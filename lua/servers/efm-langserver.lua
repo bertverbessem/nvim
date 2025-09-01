@@ -53,6 +53,7 @@ return function(lspconfig, capabilities, on_attach)
             "yaml.ansible",
             "terraform",
             "hcl",
+            "groovy",
         },
         init_options = {
             documentFormatting = true,
@@ -76,6 +77,7 @@ return function(lspconfig, capabilities, on_attach)
                 ["yaml.ansible"] = { secretlint },
                 terraform = { terraform_fmt },
                 hcl = { terraform_fmt },
+                groovy = {},
             },
         },
     })
