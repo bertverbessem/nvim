@@ -92,3 +92,133 @@ vim.api.nvim_create_autocmd("LspAttach", {
         end
     end,
 })
+
+-- space between tmux and nvim
+vim.api.nvim_create_autocmd("BufEnter", {
+    callback = function()
+        vim.o.cmdheight = 1
+    end,
+})
+--
+-- Docker compose
+vim.api.nvim_create_autocmd("BufEnter", {
+    group = vim.api.nvim_create_augroup("Docker-compose", { clear = true }),
+    pattern = { "docker-compose*.yaml", "docker-compose*.yml" },
+    command = "set filetype=yaml.docker-compose",
+})
+
+-- Jenkinsfile pattern highlight treesitter
+vim.api.nvim_create_autocmd("BufEnter", {
+    group = vim.api.nvim_create_augroup("Jenkinsfile", { clear = true }),
+    pattern = { "Jenkinsfile-*", "Jenkinsfile", "jenkinsfile", "jenkinsfile-*" },
+    command = "set filetype=groovy",
+})
+
+-- Dockerfile pattern highlight treesitter
+vim.api.nvim_create_autocmd("BufEnter", {
+    group = vim.api.nvim_create_augroup("Dockerfile", { clear = true }),
+    pattern = { "Dockerfile-*", "Dockerfile", "dockerfile", "dockerfile-*", "Dockerfile*", "dockerfile*" },
+    command = "set filetype=dockerfile",
+})
+
+-- Autovalidate Jenkinsfile
+--- Create a flag
+local flag = false
+
+--- Create a namespace
+local namespace_id = vim.api.nvim_create_namespace("jenkinsfile_linter")
+
+--- Autovalidate Jenkinsfile
+vim.api.nvim_create_autocmd("BufWritePost", {
+    group = vim.api.nvim_create_augroup("AutoValidateJenkinsfile", { clear = true }),
+    pattern = { "Jenkinsfile-*", "Jenkinsfile", "jenkinsfile", "jenkinsfile-*", "deploy.groovy" },
+    callback = function()
+        -- Check the first line of the buffer
+        local first_line = vim.fn.getline(1)
+        if first_line:find("@Library") then
+            return
+        end
+        -- Check the flag
+        if flag then
+            -- Reset the flag
+            flag = false
+        else
+            -- Set the flag
+            flag = true
+            -- log the buffer name and event
+            -- print("Buffer name: " .. vim.fn.expand("%"))
+            -- print("Event: BufWritePost")
+            -- create curl command
+            local user = os.getenv("JENKINS_USER_ID")
+            local token = os.getenv("JENKINS_API_TOKEN")
+            local jenkins_url = os.getenv("JENKINS_URL")
+            local curl_command = "curl --silent --user "
+                .. user
+                .. ":"
+                .. token
+                .. " -X POST -F 'jenkinsfile=<"
+                .. vim.fn.expand("%:p")
+                .. "' "
+                .. jenkins_url
+                .. "/pipeline-model-converter/validate"
+            -- execute command and handle output
+
+            local output = vim.fn.system(curl_command)
+            local msg, line_str, col_str = output:match("WorkflowScript.+%d+: (.+) @ line (%d+), column (%d+).")
+            if line_str and col_str then
+                local line = tonumber(line_str) - 1
+                local col = tonumber(col_str) - 1
+
+                local diag = {
+                    bufnr = vim.api.nvim_get_current_buf(),
+                    lnum = line,
+                    end_lnum = line,
+                    col = col,
+                    end_col = col,
+                    severity = vim.diagnostic.severity.ERROR,
+                    message = msg,
+                    source = "jenkinsfile linter",
+                }
+
+                -- print the parsed output and the diagnostic message
+                -- print("Parsed output: " .. msg .. ", " .. line_str .. ", " .. col_str)
+                -- print("Diagnostic message: " .. vim.inspect(diag))
+
+                vim.diagnostic.set(namespace_id, vim.api.nvim_get_current_buf(), { diag })
+                vim.diagnostic.show(namespace_id, vim.api.nvim_get_current_buf())
+
+                -- Notify the user of the error
+                vim.notify("Error: " .. msg, vim.log.levels.ERROR)
+            else
+                -- If the output does not match the error pattern, assume it's a success message
+                vim.notify(output, vim.log.levels.INFO)
+            end
+        end
+    end,
+})
+
+-- relativenumber on off
+vim.api.nvim_create_autocmd({ "BufEnter", "FocusGained", "InsertLeave", "CmdlineLeave", "WinEnter" }, {
+  pattern = "*",
+  group = augroup,
+  callback = function()
+    if vim.o.nu and vim.api.nvim_get_mode().mode ~= "i" then
+      vim.opt.relativenumber = true
+    end
+  end,
+})
+
+vim.api.nvim_create_autocmd({ "BufLeave", "FocusLost", "InsertEnter", "CmdlineEnter", "WinLeave" }, {
+  pattern = "*",
+  group = augroup,
+  callback = function()
+    if vim.o.nu then
+      vim.opt.relativenumber = false
+      -- Conditional taken from https://github.com/rockyzhang24/dotfiles/commit/03dd14b5d43f812661b88c4660c03d714132abcf
+      -- Workaround for https://github.com/neovim/neovim/issues/32068
+      if not vim.tbl_contains({ "@", "-" }, vim.v.event.cmdtype) then
+        vim.cmd("redraw")
+      end
+    end
+  end,
+})
