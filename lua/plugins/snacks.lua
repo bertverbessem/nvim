@@ -15,8 +15,62 @@ return {
             },
         },
         explorer = { enabled = false },
-        picker = { enabled = true },
-        notifier = { enabled = false },
+        picker = {
+            enabled = true,
+            ui_select = true,
+            formatters = {
+                file = {
+                    filename_first = false,
+                    truncate = 100, -- truncate the file path to (roughly) this length
+                },
+            },
+            layouts = {
+                -- default layout
+                default = {
+                    layout = {
+                        box = "horizontal",
+                        width = 0.70,
+                        height = 0.70,
+                        {
+                            box = "vertical",
+                            border = "bold",
+                            title = "{source} {live}",
+                            title_pos = "center",
+                            { win = "input", height = 1, border = "bottom" },
+                            { win = "list", border = "none" },
+                        },
+                        { win = "preview", title = "{preview}", border = "bold", width = 0.5 },
+                    },
+                },
+                -- vertical layout
+                vertical = {
+                    layout = {
+                        backdrop = false,
+                        width = 0.5,
+                        min_width = 80,
+                        height = 0.8,
+                        min_height = 30,
+                        box = "vertical",
+                        border = "bold",
+                        title = "{title} {live} {flags}",
+                        title_pos = "center",
+                        { win = "input", height = 1, border = "bottom" },
+                        { win = "list", border = "none" },
+                        { win = "preview", title = "{preview}", height = 0.4, border = "top" },
+                    },
+                },
+            },
+        },
+        notifier = {
+            enabled = true,
+            timeout = 2000,
+            style = "compact",
+            width = { min = 35, max = 0.8 },
+            height = { min = 1, max = 0.8 },
+        },
+        image = {
+            enabled = true,
+        },
         quickfile = { enabled = true },
         scope = { enabled = true },
         scroll = { enabled = true },

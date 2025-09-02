@@ -38,4 +38,5 @@ return {
     },
     { "nvim-mini/mini.bufremove", version = "*", opts = {} },
     -- { "nvim-mini/mini.notify", version = "*", opts = {} },
+    -- { "nvim-mini/mini.pick", version = "*", opts = {} },
 }
