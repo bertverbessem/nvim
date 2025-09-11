@@ -30,15 +30,36 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 })
 
 -- format on save using efm langserver and configured formatters
-local lsp_fmt_group = vim.api.nvim_create_augroup("FormatOnSaveGroup", {})
+-- format on save using efm langserver and configured formatters
+local lsp_fmt_group = vim.api.nvim_create_augroup("FormatOnSaveGroup", { clear = true })
+
 vim.api.nvim_create_autocmd("BufWritePre", {
     group = lsp_fmt_group,
-    callback = function()
-        local efm = vim.lsp.get_clients({ name = "efm" })
-        if vim.tbl_isempty(efm) then
+    callback = function(args)
+        local bufnr = args.buf
+        -- get all active clients for this buffer
+        local clients = vim.lsp.get_clients({ bufnr = bufnr })
+        -- filter for efm
+        local efm_clients = vim.tbl_filter(function(client)
+            return client.name == "efm"
+                and (
+                    client.server_capabilities.documentFormattingProvider
+                    or client.server_capabilities.documentRangeFormattingProvider
+                )
+        end, clients)
+
+        if vim.tbl_isempty(efm_clients) then
             return
         end
-        vim.lsp.buf.format({ name = "efm", async = true })
+
+        -- format with all eligible EFM clients
+        vim.lsp.buf.format({
+            bufnr = bufnr,
+            async = true,
+            filter = function(client)
+                return client.name == "efm"
+            end,
+        })
     end,
 })
 
@@ -199,26 +220,26 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 
 -- relativenumber on off
 vim.api.nvim_create_autocmd({ "BufEnter", "FocusGained", "InsertLeave", "CmdlineLeave", "WinEnter" }, {
-  pattern = "*",
-  group = augroup,
-  callback = function()
-    if vim.o.nu and vim.api.nvim_get_mode().mode ~= "i" then
-      vim.opt.relativenumber = true
-    end
-  end,
+    pattern = "*",
+    group = augroup,
+    callback = function()
+        if vim.o.nu and vim.api.nvim_get_mode().mode ~= "i" then
+            vim.opt.relativenumber = true
+        end
+    end,
 })
 
 vim.api.nvim_create_autocmd({ "BufLeave", "FocusLost", "InsertEnter", "CmdlineEnter", "WinLeave" }, {
-  pattern = "*",
-  group = augroup,
-  callback = function()
-    if vim.o.nu then
-      vim.opt.relativenumber = false
-      -- Conditional taken from https://github.com/rockyzhang24/dotfiles/commit/03dd14b5d43f812661b88c4660c03d714132abcf
-      -- Workaround for https://github.com/neovim/neovim/issues/32068
-      if not vim.tbl_contains({ "@", "-" }, vim.v.event.cmdtype) then
-        vim.cmd("redraw")
-      end
-    end
-  end,
+    pattern = "*",
+    group = augroup,
+    callback = function()
+        if vim.o.nu then
+            vim.opt.relativenumber = false
+            -- Conditional taken from https://github.com/rockyzhang24/dotfiles/commit/03dd14b5d43f812661b88c4660c03d714132abcf
+            -- Workaround for https://github.com/neovim/neovim/issues/32068
+            if not vim.tbl_contains({ "@", "-" }, vim.v.event.cmdtype) then
+                vim.cmd("redraw")
+            end
+        end
+    end,
 })
