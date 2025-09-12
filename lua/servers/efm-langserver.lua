@@ -35,6 +35,7 @@ return function(lspconfig, capabilities, on_attach)
         lintIgnoreExitCode = true,
         rootMarkers = { ".secretlintrc.json", ".secretlintrc.js", "package.json" },
     }
+    local sshconfig = require("efmls-configs.formatters.sshconfig") -- sshconfig with shfmt formatter with 2 spaces
     -- local codespell = require("efmls-configs.linters.codespell") -- common misspellings linter
 
     lspconfig.efm.setup({
@@ -54,6 +55,7 @@ return function(lspconfig, capabilities, on_attach)
             "terraform",
             "hcl",
             "groovy",
+            "sshconfig",
         },
         init_options = {
             documentFormatting = true,
@@ -78,6 +80,7 @@ return function(lspconfig, capabilities, on_attach)
                 terraform = { terraform_fmt },
                 hcl = { terraform_fmt },
                 groovy = {},
+                sshconfig = { sshconfig },
             },
         },
     })
