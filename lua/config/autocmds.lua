@@ -246,50 +246,74 @@ vim.api.nvim_create_autocmd({ "BufLeave", "FocusLost", "InsertEnter", "CmdlineEn
 
 --
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = "markdown",
-  callback = function()
-    vim.schedule(function()
-      -- remove treesitter <CR> mappings in this buffer
-      pcall(vim.keymap.del, "n", "<CR>", { buffer = true })
-      pcall(vim.keymap.del, "x", "<CR>", { buffer = true })
+    pattern = "markdown",
+    callback = function()
+        vim.schedule(function()
+            -- remove treesitter <CR> mappings in this buffer
+            pcall(vim.keymap.del, "n", "<CR>", { buffer = true })
+            pcall(vim.keymap.del, "x", "<CR>", { buffer = true })
 
-      -- normal mode <CR>: toggle checkbox
-      vim.keymap.set("n", "<CR>", function()
-        local line = vim.api.nvim_get_current_line()
-        local new_line
+            -- normal mode <CR>: toggle checkbox
+            vim.keymap.set("n", "<CR>", function()
+                local line = vim.api.nvim_get_current_line()
+                local new_line
 
-        if line:match("%- %[ %]") then
-          new_line = line:gsub("%- %[ %]", "- [x]", 1)
-        elseif line:match("%- %[x%]") then
-          new_line = line:gsub("%- %[x%]", "- [ ]", 1)
-        end
+                if line:match("%- %[ %]") then
+                    new_line = line:gsub("%- %[ %]", "- [x]", 1)
+                elseif line:match("%- %[x%]") then
+                    new_line = line:gsub("%- %[x%]", "- [ ]", 1)
+                end
 
-        if new_line then
-          vim.api.nvim_set_current_line(new_line)
-        else
-          -- fallback: feed <CR> to existing mappings
-          vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<CR>", true, false, true), "n", false)
-        end
-      end, { buffer = true, noremap = true, silent = true })
+                if new_line then
+                    vim.api.nvim_set_current_line(new_line)
+                else
+                    -- fallback: feed <CR> to existing mappings
+                    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<CR>", true, false, true), "n", false)
+                end
+            end, { buffer = true, noremap = true, silent = true })
 
-      -- visual mode <CR>: toggle checkboxes in selection
-      vim.keymap.set("x", "<CR>", function()
-        local start_row = vim.fn.line("'<")
-        local end_row   = vim.fn.line("'>")
-        for lnum = start_row, end_row do
-          local line = vim.fn.getline(lnum)
-          local new_line
-          if line:match("%- %[ %]") then
-            new_line = line:gsub("%- %[ %]", "- [x]", 1)
-          elseif line:match("%- %[x%]") then
-            new_line = line:gsub("%- %[x%]", "- [ ]", 1)
-          end
-          if new_line then
-            vim.fn.setline(lnum, new_line)
-          end
-        end
-      end, { buffer = true, noremap = true, silent = true })
-    end)
-  end,
+            -- visual mode <CR>: toggle checkboxes in selection
+            vim.keymap.set("x", "<CR>", function()
+                local start_row = vim.fn.line("'<")
+                local end_row = vim.fn.line("'>")
+                for lnum = start_row, end_row do
+                    local line = vim.fn.getline(lnum)
+                    local new_line
+                    if line:match("%- %[ %]") then
+                        new_line = line:gsub("%- %[ %]", "- [x]", 1)
+                    elseif line:match("%- %[x%]") then
+                        new_line = line:gsub("%- %[x%]", "- [ ]", 1)
+                    end
+                    if new_line then
+                        vim.fn.setline(lnum, new_line)
+                    end
+                end
+            end, { buffer = true, noremap = true, silent = true })
+        end)
+    end,
 })
 
+-- disable automatic comment on newline
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = "*",
+    callback = function()
+        vim.opt_local.formatoptions:remove({ "c", "r", "o" })
+    end,
+})
+
+-- Continue - [ ] on enter
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile", "BufEnter" }, {
+    -- pattern = "markdown",
+    pattern = vim.fn.expand("~/.local/share/notes/todo.md"),
+    callback = function()
+        vim.keymap.set("i", "<CR>", function()
+            local line = vim.api.nvim_get_current_line()
+            if line:match("^%s*%- %[.?%]") then
+                local indent = line:match("^%s*") or ""
+                return "\n" .. indent .. "- [ ] "
+            else
+                return "\n"
+            end
+        end, { buffer = true, expr = true })
+    end,
+})
