@@ -317,3 +317,13 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile", "BufEnter" }, {
         end, { buffer = true, expr = true })
     end,
 })
+
+-- Disable highlight on tmux
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = "tmux",
+    callback = function()
+        vim.schedule(function()
+            vim.cmd(":TSBufToggle highlight")
+        end)
+    end,
+})
