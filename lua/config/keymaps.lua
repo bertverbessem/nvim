@@ -18,8 +18,8 @@ map("n", "<C-d>", "<C-d>zz", { desc = "Half page down (centered)" })
 map("n", "<C-u>", "<C-u>zz", { desc = "Half page up (centered)" })
 
 -- Buffer navigation
-map("n", "<leader>bn", "<Cmd>bnext<CR>", { desc = "Next buffer" })
-map("n", "<leader>bp", "<Cmd>bprevious<CR>", { desc = "Previous buffer" })
+map("n", "<S-l>", "<Cmd>bnext<CR>", { desc = "Next buffer" })
+map("n", "<S-h>", "<Cmd>bprevious<CR>", { desc = "Previous buffer" })
 
 -- Better window navigation
 map("n", "<C-h>", "<C-w>h", { desc = "Move to left window" })
@@ -46,7 +46,7 @@ map("n", "J", "mzJ`z", { desc = "Join lines and keep cursor position" })
 map("n", "<leader>rc", "<Cmd>e ~/.config/nvim/init.lua<CR>", { desc = "Edit config" })
 
 -- File Explorer
-map("n", "<leader>m", "<Cmd>NvimTreeFocus<CR>", { desc = "Focus on File Explorer" })
+map("n", "<leader>F", "<Cmd>NvimTreeFocus<CR>", { desc = "Focus on File Explorer" })
 map("n", "<leader>e", "<Cmd>NvimTreeToggle<CR>", { desc = "Toggle File Explorer" })
 
 -- Find files inside ~/.config
