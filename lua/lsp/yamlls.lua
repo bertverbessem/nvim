@@ -12,17 +12,7 @@ vim.lsp.config("yamlls", {
         },
     },
     -- Add root_dir pattern to avoid yamlls on ansible projects
-    root_dir = function(fname)
-        -- Don't start yamlls if we detect ansible files
-        local ansible_patterns = { "ansible.cfg", ".ansible-lint", "playbook.yml", "playbooks/" }
-        for _, pattern in ipairs(ansible_patterns) do
-            if vim.fs.root(fname, pattern) then
-                return nil
-            end
-        end
-        -- Use default yaml root patterns
-        return vim.fs.root(fname, { ".git", "pyproject.toml", "setup.py" })
-    end,
+    root_markers = { ".git", "pyproject.toml", "setup.py" },
 })
 
 vim.lsp.enable("yamlls")

@@ -29,12 +29,7 @@ vim.lsp.config("ansiblels", {
     filetypes = {
         "yaml.ansible",
     },
-    root_dir = function(fname)
-        return vim.fs.root(
-            fname,
-            { "ansible.cfg", ".ansible-lint", "playbook.yml", "playbooks/", "pyproject.toml", ".git" }
-        )
-    end,
+    root_markers = { "ansible.cfg", ".ansible-lint", "playbook.yml", "playbooks/", "pyproject.toml", ".git" },
 })
 
 -- Enable ansiblels for its filetypes

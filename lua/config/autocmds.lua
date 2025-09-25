@@ -385,3 +385,15 @@ vim.api.nvim_create_autocmd("LspAttach", {
         end
     end,
 })
+
+-- fix .env
+local lsp_hacks = vim.api.nvim_create_augroup("LspHacks", { clear = true })
+
+-- Stop diagnostics in .env files
+vim.api.nvim_create_autocmd({ "BufNewFile", "BufReadPost" }, {
+    group = lsp_hacks,
+    pattern = { ".env*", ".docker.env*" },
+    callback = function(e)
+        vim.diagnostic.enable(false, { bufnr = e.buf })
+    end,
+})
