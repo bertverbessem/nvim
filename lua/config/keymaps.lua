@@ -319,13 +319,13 @@ end, { desc = "Decrypt vault content under cursor or selection" })
 -- Snacks
 -- floating terminal
 map("n", "<leader>ft", function()
-    require("snacks").terminal(nil, { cwd = require("utils.root").get_root() })
+    require("snacks").terminal(nil, { cwd = vim.fs.root(0, { ".git", "package.json", "Makefile" }) or vim.fn.getcwd() })
 end, { desc = "Terminal (Root Dir)" })
 map("n", "<c-/>", function()
-    require("snacks").terminal(nil, { cwd = require("utils.root").get_current_dir() })
+    require("snacks").terminal(nil, { cwd = vim.fn.expand("%:p:h") })
 end, { desc = "Terminal (Current Dir)" })
 map("n", "<c-_>", function()
-    require("snacks").terminal(nil, { cwd = require("utils.root").get_current_dir() })
+    require("snacks").terminal(nil, { cwd = vim.fn.expand("%:p:h") })
 end, { desc = "which_key_ignore" })
 
 -- Terminal Mappings
