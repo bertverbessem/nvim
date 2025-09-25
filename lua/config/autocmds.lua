@@ -327,3 +327,9 @@ vim.api.nvim_create_autocmd("FileType", {
         end)
     end,
 })
+-- Auto-lint on save and text change
+vim.api.nvim_create_autocmd({ "BufWritePost" }, {
+    callback = function()
+        require("lint").try_lint()
+    end,
+})
