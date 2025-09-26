@@ -120,27 +120,6 @@ vim.api.nvim_create_autocmd("BufEnter", {
         vim.o.cmdheight = 1
     end,
 })
---
--- Docker compose
-vim.api.nvim_create_autocmd("BufEnter", {
-    group = vim.api.nvim_create_augroup("Docker-compose", { clear = true }),
-    pattern = { "docker-compose*.yaml", "docker-compose*.yml" },
-    command = "set filetype=yaml.docker-compose",
-})
-
--- Jenkinsfile pattern highlight treesitter
-vim.api.nvim_create_autocmd("BufEnter", {
-    group = vim.api.nvim_create_augroup("Jenkinsfile", { clear = true }),
-    pattern = { "Jenkinsfile-*", "Jenkinsfile", "jenkinsfile", "jenkinsfile-*" },
-    command = "set filetype=groovy",
-})
-
--- Dockerfile pattern highlight treesitter
-vim.api.nvim_create_autocmd("BufEnter", {
-    group = vim.api.nvim_create_augroup("Dockerfile", { clear = true }),
-    pattern = { "Dockerfile-*", "Dockerfile", "dockerfile", "dockerfile-*", "Dockerfile*", "dockerfile*" },
-    command = "set filetype=dockerfile",
-})
 
 -- Autovalidate Jenkinsfile
 --- Create a flag
