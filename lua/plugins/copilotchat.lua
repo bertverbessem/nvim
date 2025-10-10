@@ -9,7 +9,7 @@ return {
         auto_insert_mode = true,
         agent = "copilot",
         debug = false,
-        model = "claude-sonnet-4",
+        model = "claude-sonnet-4.5",
         show_help = false,
         window = {
             layout = "vertical",
@@ -21,7 +21,7 @@ return {
             tool = "🔧 Tool",
         },
         sticky = {
-            "#buffers:visible",
+            "#buffer:visible",
         },
     },
     keys = {
