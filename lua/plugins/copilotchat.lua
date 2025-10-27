@@ -25,7 +25,7 @@ return {
         },
     },
     keys = {
-        { "<leader>aa", "<cmd>CopilotChat<cr>", desc = "Open Copilot Chat" },
+        { "<leader>aa", "<cmd>CopilotChatToggle<cr>", desc = "Open Copilot Chat" },
         { "<leader>ap", "<cmd>CopilotChatPrompts<cr>", desc = "Copilot Prompts" },
         {
             "<leader>aq",
@@ -39,7 +39,7 @@ return {
         },
         -- Visual mode mappings
         { "<leader>aa", "<cmd>CopilotChat<cr>", mode = "v", desc = "Open Copilot Chat with selection" },
-        { "<leader>ap", "<cmd>CopilotChatPrompts<cr>", mode = "v", desc = "Copilot Prompts with selection" },
+        { "<leader>ap", ":lua require(CopilotChat).prompts<cr>", mode = "v", desc = "Copilot Prompts with selection" },
         {
             "<leader>aq",
             function()
