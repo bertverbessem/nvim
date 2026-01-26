@@ -16,7 +16,7 @@ return {
         },
         explorer = { enabled = false },
         picker = {
-            enabled = false,
+            enabled = true,
             ui_select = true,
             formatters = {
                 file = {
