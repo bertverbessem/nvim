@@ -53,3 +53,5 @@ require("lazy").setup({
     install = { colorscheme = { "vague" } },
     checker = { enabled = false },
 })
+-- Load LSP configs AFTER plugins
+require("config.lsp")

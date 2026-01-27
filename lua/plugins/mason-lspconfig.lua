@@ -18,7 +18,7 @@ return {
                 "terraformls",
             },
         },
-        dependencies = { "neovim/nvim-lspconfig" },
+        -- dependencies = { "neovim/nvim-lspconfig" },
     },
     {
         "jay-babu/mason-null-ls.nvim",

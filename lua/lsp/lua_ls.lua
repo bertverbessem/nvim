@@ -4,37 +4,36 @@
 --   > github: https://github.com/LuaLS/lua-language-server
 -- ================================================================================================
 
--- luacheck: globals vim Snacks
-
 vim.lsp.config("lua_ls", {
+    cmd = { "lua-language-server" },
+    filetypes = { "lua" },
+    root_markers = { ".luarc.json", ".luarc.jsonc", ".git" },
     capabilities = require("cmp_nvim_lsp").default_capabilities(),
-    on_init = function(client)
-        if client.workspace_folders then
-            local path = client.workspace_folders[1].name
-            local luarc = vim.uv.fs_stat(path .. "/.luarc.json") or vim.uv.fs_stat(path .. "/.luarc.jsonc")
-            if path ~= vim.fn.stdpath("config") and luarc then
-                return
-            end
-        end
-    end,
     settings = {
         Lua = {
-            runtime = {
-                version = "LuaJIT",
-                path = { "lua/?.lua", "lua/?/init.lua" },
-            },
+            runtime = { version = "LuaJIT" },
             diagnostics = { globals = { "vim", "Snacks" } },
             workspace = {
-                library = {
-                    vim.env.VIMRUNTIME,
-                    vim.fn.stdpath("config") .. "/lua",
-                    "${3rd}/luv/library",
-                },
+                library = { vim.env.VIMRUNTIME },
                 checkThirdParty = false,
             },
             telemetry = { enable = false },
         },
     },
+    on_attach = function(client)
+        client.config.settings = {
+            Lua = {
+                runtime = { version = "LuaJIT" },
+                diagnostics = { globals = { "vim", "Snacks" } },
+                workspace = {
+                    library = { vim.env.VIMRUNTIME },
+                    checkThirdParty = false,
+                },
+                telemetry = { enable = false },
+            },
+        }
+        client.notify("workspace/didChangeConfiguration", { settings = client.config.settings })
+    end,
 })
 
 vim.lsp.enable("lua_ls")
