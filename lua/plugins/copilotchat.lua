@@ -39,7 +39,7 @@ return {
         },
         -- Visual mode mappings
         { "<leader>aa", "<cmd>CopilotChat<cr>", mode = "v", desc = "Open Copilot Chat with selection" },
-        { "<leader>ap", ":lua require(CopilotChat).prompts<cr>", mode = "v", desc = "Copilot Prompts with selection" },
+        { "<leader>ap", "<cmd>CopilotChatPrompts<cr>", mode = "v", desc = "Copilot Prompts with selection" },
         {
             "<leader>aq",
             function()
