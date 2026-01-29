@@ -46,9 +46,10 @@ vim.lsp.config("ansiblels", {
                 interpreterPath = python_path,
             },
             validation = {
-                enabled = false, -- Disable LSP validation, use nvim-lint instead
+                enabled = true,
                 lint = {
-                    enabled = false,
+                    enabled = true,
+                    path = ansible_lint_path,
                 },
             },
         },
