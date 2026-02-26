@@ -10,48 +10,32 @@ return {
     config = function()
         require("vague").setup({
             transparent = true,
-            style = {
-                boolean = "none",
-                number = "none",
-                float = "none",
-                error = "none",
-                comments = "italic",
-                conditionals = "none",
-                functions = "none",
-                headings = "bold",
-                operators = "none",
-                strings = "none",
-                variables = "none",
-                keywords = "italic",
-                keyword_return = "none",
-                keywords_loop = "none",
-                keywords_label = "none",
-                keywords_exception = "none",
-                builtin_constants = "none",
-                builtin_functions = "none",
-                builtin_types = "none",
-                builtin_variables = "none",
-            },
-            colors = {
-                -- You can override specific colors here if needed
-            },
-            -- Custom highlight groups for markdown
-            highlights = {
+            bold = true,
+            italic = true,
+            -- Override highlights or add new highlights
+            on_highlights = function(hl, _)
+                -- For available options see `:h nvim_set_hl()`
+                -- hl.NewHighlight = { fg = colors.fg, bg = colors.bg, bold = true }
+                -- hl.ExistingHighlight.fg = colors.delta -- only overwrite fg
                 -- Markdown headings with vague-style colors
-                RenderMarkdownH1 = { fg = "#d4be98", bold = true }, -- warm yellow
-                RenderMarkdownH2 = { fg = "#7daea3", bold = true }, -- teal
-                RenderMarkdownH3 = { fg = "#d3869b", bold = true }, -- pink
-                RenderMarkdownH4 = { fg = "#a9b665", bold = true }, -- green
-                RenderMarkdownH5 = { fg = "#89b4f5", bold = true }, -- blue
-                RenderMarkdownH6 = { fg = "#e78a4e", bold = true }, -- orange
+                hl.RenderMarkdownH1 = { fg = "#d4be98", bold = true } -- warm yellow
+                hl.RenderMarkdownH2 = { fg = "#7daea3", bold = true } -- teal
+                hl.RenderMarkdownH3 = { fg = "#d3869b", bold = true } -- pink
+                hl.RenderMarkdownH4 = { fg = "#a9b665", bold = true } -- green
+                hl.RenderMarkdownH5 = { fg = "#89b4f5", bold = true } -- blue
+                hl.RenderMarkdownH6 = { fg = "#e78a4e", bold = true } -- orange
 
                 -- Background highlights (subtle)
-                RenderMarkdownH1Bg = { bg = "#3c3836", fg = "#d4be98" },
-                RenderMarkdownH2Bg = { bg = "#3c3836", fg = "#7daea3" },
-                RenderMarkdownH3Bg = { bg = "#3c3836", fg = "#d3869b" },
-                RenderMarkdownH4Bg = { bg = "#3c3836", fg = "#a9b665" },
-                RenderMarkdownH5Bg = { bg = "#3c3836", fg = "#89b4f5" },
-                RenderMarkdownH6Bg = { bg = "#3c3836", fg = "#e78a4e" },
+                hl.RenderMarkdownH1Bg = { bg = "#3c3836", fg = "#d4be98" }
+                hl.RenderMarkdownH2Bg = { bg = "#3c3836", fg = "#7daea3" }
+                hl.RenderMarkdownH3Bg = { bg = "#3c3836", fg = "#d3869b" }
+                hl.RenderMarkdownH4Bg = { bg = "#3c3836", fg = "#a9b665" }
+                hl.RenderMarkdownH5Bg = { bg = "#3c3836", fg = "#89b4f5" }
+                hl.RenderMarkdownH6Bg = { bg = "#3c3836", fg = "#e78a4e" }
+            end,
+
+            colors = {
+                -- You can override specific colors here if needed
             },
         })
         vim.cmd("colorscheme vague")
