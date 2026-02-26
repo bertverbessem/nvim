@@ -11,7 +11,7 @@ return {
         require("vague").setup({
             transparent = true,
             bold = true,
-            italic = true,
+            italic = false,
             -- Override highlights or add new highlights
             on_highlights = function(hl, _)
                 -- For available options see `:h nvim_set_hl()`
