@@ -31,6 +31,9 @@ return {
                 "flake8", -- Python linter
                 "prettier", -- JS/TS/JSON formatter
                 "eslint_d", -- JS/TS linter
+                "gofumpt", -- Go formatter
+                "fixjson", -- JSON formatter
+                "yamlfmt", -- YAML formatter
             },
             automatic_installation = true,
         },

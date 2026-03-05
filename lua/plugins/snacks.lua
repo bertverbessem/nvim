@@ -67,6 +67,9 @@ return {
             style = "compact",
             width = { min = 35, max = 0.8 },
             height = { min = 1, max = 0.8 },
+            filter = function(notif)
+                return notif.msg ~= "No results found for `select`"
+            end,
         },
         image = {
             enabled = true,

@@ -11,7 +11,7 @@ return {
 	event = { "BufReadPost", "BufNewFile" },
 	lazy = false,
 	config = function()
-		require("nvim-treesitter.configs").setup({
+		require("nvim-treesitter").setup({
 			-- language parsers that MUST be installed
 			ensure_installed = {
 				"bash",

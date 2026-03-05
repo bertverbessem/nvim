@@ -14,4 +14,4 @@ vim.lsp.config("bashls", {
         },
     },
 })
-vim.lsp.enable("ansiblels")
+vim.lsp.enable("bashls")
