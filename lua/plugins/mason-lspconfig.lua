@@ -34,6 +34,7 @@ return {
                 "gofumpt", -- Go formatter
                 "fixjson", -- JSON formatter
                 "yamlfmt", -- YAML formatter
+                "luacheck", -- lua linter
             },
             automatic_installation = true,
         },

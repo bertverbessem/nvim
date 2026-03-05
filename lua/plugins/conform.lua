@@ -28,7 +28,8 @@ return {
                     if first_line and first_line:match("$ANSIBLE_VAULT") then
                         return {} -- Don't format vault files
                     end
-                    return { "yamlfmt" }
+                    -- return { "yamlfmt" }
+                    return {}
                 end,
                 markdown = { "prettier" },
                 docker = { "prettier" },
