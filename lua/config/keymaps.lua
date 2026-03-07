@@ -29,7 +29,7 @@ map("n", "<C-l>", "<C-w>l", { desc = "Move to right window" })
 
 -- Splitting & Resizing
 map("n", "<leader>sv", "<Cmd>vsplit<CR>", { desc = "Split window vertically" })
-map("n", "<leader>sh", "<Cmd>split<CR>", { desc = "Split window horizontally" })
+map("n", "<leader>sx", "<Cmd>split<CR>", { desc = "Split window horizontally" })
 map("n", "<C-Up>", "<Cmd>resize +2<CR>", { desc = "Increase window height" })
 map("n", "<C-Down>", "<Cmd>resize -2<CR>", { desc = "Decrease window height" })
 map("n", "<C-Left>", "<Cmd>vertical resize -2<CR>", { desc = "Decrease window width" })

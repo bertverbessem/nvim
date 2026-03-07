@@ -421,6 +421,84 @@ return {
             end,
             desc = "Undo History",
         },
+        -- fzf-lua equivalents
+        {
+            "<leader>ff",
+            function()
+                require("snacks").picker.files({ cwd = vim.fn.getcwd() })
+            end,
+            desc = "Find Files",
+        },
+        {
+            "<leader><leader>",
+            function()
+                require("snacks").picker.files({ cwd = vim.fn.expand("%:p:h") })
+            end,
+            desc = "Find Files (cwd)",
+        },
+        {
+            "<leader>fr",
+            function()
+                require("snacks").picker.recent()
+            end,
+            desc = "Recent Files",
+        },
+        {
+            "<leader>fg",
+            function()
+                require("snacks").picker.grep()
+            end,
+            desc = "Live Grep",
+        },
+        {
+            "<leader>fb",
+            function()
+                require("snacks").picker.buffers()
+            end,
+            desc = "Buffers",
+        },
+        {
+            "<leader>fh",
+            function()
+                require("snacks").picker.help()
+            end,
+            desc = "Help Tags",
+        },
+        {
+            "<leader>fx",
+            function()
+                require("snacks").picker.diagnostics_buffer()
+            end,
+            desc = "Diagnostics Document",
+        },
+        {
+            "<leader>fX",
+            function()
+                require("snacks").picker.diagnostics()
+            end,
+            desc = "Diagnostics Workspace",
+        },
+        {
+            "<leader>fs",
+            function()
+                require("snacks").picker.lsp_symbols()
+            end,
+            desc = "Document Symbols",
+        },
+        {
+            "<leader>fS",
+            function()
+                require("snacks").picker.lsp_workspace_symbols()
+            end,
+            desc = "Workspace Symbols",
+        },
+        {
+            "<leader>fc",
+            function()
+                require("snacks").picker.files({ cwd = "~/.config/nvim" })
+            end,
+            desc = "Find Config Files",
+        },
         --     {
         --         "<leader>uC",
         --         function()
