@@ -160,10 +160,13 @@ vim.keymap.set("n", "<leader>vse", function()
     local line_nr = vim.fn.line(".")
     local line = vim.fn.getline(line_nr)
 
-    -- Match variable_name: "value"
-    local var_name, value = line:match("^%s*([%w_]+)%s*:%s*['\"](.-)['\"]%s*$")
-    if not var_name or not value then
-        print('❌ Line must be in format variable_name: "value"')
+    -- Match variable_name: "value" or variable_name: value (unquoted)
+    local var_name, value = line:match([[^%s*([%w_]+)%s*:%s*['"](.-)['"]%s*$]])
+    if not var_name then
+        var_name, value = line:match("^%s*([%w_]+)%s*:%s*(.-)%s*$")
+    end
+    if not var_name or not value or value == "" then
+        vim.notify('❌ Line must be in format variable_name: "value"', vim.log.levels.ERROR)
         return
     end
 
@@ -171,13 +174,13 @@ vim.keymap.set("n", "<leader>vse", function()
 
     -- Encrypt with proper shell escaping
     local cmd = string.format(
-        "ansible-vault encrypt_string %s --name %s",
+        "ansible-vault encrypt_string --vault-pass-file ~/.vault_pass.txt --encrypt-vault-id default %s --name %s",
         vim.fn.shellescape(value),
         vim.fn.shellescape(var_name)
     )
     local result = vim.fn.system(cmd)
     if vim.v.shell_error ~= 0 or result == "" then
-        print("❌ Encryption failed")
+        vim.notify("❌ Encryption failed: " .. result, vim.log.levels.ERROR)
         return
     end
 
@@ -191,7 +194,7 @@ vim.keymap.set("n", "<leader>vse", function()
 
     -- Replace current line with multi-line vault block
     vim.api.nvim_buf_set_lines(0, line_nr - 1, line_nr, false, encrypted_lines)
-    print("🔐 Encrypted " .. var_name)
+    vim.notify("🔐 Encrypted " .. var_name, vim.log.levels.INFO)
 end, { desc = "Encrypt variable value under cursor" })
 
 -- decrypt ansible vault string
@@ -201,33 +204,47 @@ vim.keymap.set({ "v", "n" }, "<leader>vsd", function()
     local end_line_nr = nil
 
     if vim.fn.mode() == "v" or vim.fn.mode() == "V" then
-        -- Visual mode: use selection
-        local region = vim.fn.getregion(vim.fn.getpos("'<"), vim.fn.getpos("'>"), { type = vim.fn.visualmode() })
-        vault_lines = region
-        start_line_nr = vim.fn.line("'<")
-        end_line_nr = vim.fn.line("'>")
+        -- Visual mode: capture line numbers before leaving visual mode
+        start_line_nr = vim.fn.line("v")
+        end_line_nr = vim.fn.line(".")
+        if start_line_nr > end_line_nr then
+            start_line_nr, end_line_nr = end_line_nr, start_line_nr
+        end
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "x", false)
+        vault_lines = vim.api.nvim_buf_get_lines(0, start_line_nr - 1, end_line_nr, false)
     else
         -- Normal mode: auto-detect vault block
         local current_line = vim.fn.line(".")
         local buf_lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
 
+        -- If cursor is on the !vault declaration line, search forward for vault block
+        local search_from = current_line
+        if buf_lines[current_line]:match("!vault") then
+            for i = current_line + 1, #buf_lines do
+                if buf_lines[i]:match("%$ANSIBLE_VAULT") then
+                    search_from = i
+                    break
+                end
+            end
+        end
+
         -- Find vault start (look backwards from cursor)
-        for i = current_line, 1, -1 do
-            if buf_lines[i]:match("$ANSIBLE_VAULT") then
+        for i = search_from, 1, -1 do
+            if buf_lines[i]:match("%$ANSIBLE_VAULT") then
                 start_line_nr = i
                 break
             end
         end
 
         if not start_line_nr then
-            print("❌ No vault block found")
+            vim.notify("❌ No vault block found", vim.log.levels.ERROR)
             return
         end
 
         -- Collect vault lines from start until end of vault content
         for i = start_line_nr, #buf_lines do
             local line = buf_lines[i]
-            if line:match("^%s*[a-f0-9]+%s*$") or line:match("$ANSIBLE_VAULT") then
+            if line:match("^%s*[a-f0-9]+%s*$") or line:match("%$ANSIBLE_VAULT") then
                 table.insert(vault_lines, line:match("^%s*(.-)%s*$")) -- trim whitespace
                 end_line_nr = i
             elseif #vault_lines > 0 then
@@ -238,7 +255,7 @@ vim.keymap.set({ "v", "n" }, "<leader>vsd", function()
     end
 
     if #vault_lines == 0 then
-        print("❌ No vault content found")
+        vim.notify("❌ No vault content found", vim.log.levels.ERROR)
         return
     end
 
@@ -253,7 +270,7 @@ vim.keymap.set({ "v", "n" }, "<leader>vsd", function()
     local tmpname = vim.fn.tempname()
     local f = io.open(tmpname, "w")
     if not f then
-        print("❌ Failed to create temporary file")
+        vim.notify("❌ Failed to create temporary file", vim.log.levels.ERROR)
         return
     end
 
@@ -271,7 +288,7 @@ vim.keymap.set({ "v", "n" }, "<leader>vsd", function()
     os.remove(tmpname)
 
     if vim.v.shell_error ~= 0 then
-        print("❌ Decryption failed: " .. result)
+        vim.notify("❌ Decryption failed: " .. result, vim.log.levels.ERROR)
         return
     end
     -- Get the original indentation from the variable declaration line (not the vault content)
@@ -310,7 +327,7 @@ vim.keymap.set({ "v", "n" }, "<leader>vsd", function()
     -- Position cursor on the decrypted content
     vim.api.nvim_win_set_cursor(0, { cursor_line, 0 })
 
-    print("🔓 Vault content decrypted and replaced")
+    vim.notify("🔓 Vault content decrypted and replaced", vim.log.levels.INFO)
 end, { desc = "Decrypt vault content under cursor or selection" })
 
 -- Snacks
