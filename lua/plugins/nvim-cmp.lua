@@ -68,8 +68,7 @@ return {
                 ["<C-j>"] = cmp.mapping.select_next_item(),
                 ["<C-u>"] = cmp.mapping.scroll_docs(-4),
                 ["<C-d>"] = cmp.mapping.scroll_docs(4),
-                ["<C-y>"] = cmp.mapping.complete(),
-                ["<C-e>"] = cmp.mapping.abort(),
+["<C-e>"] = cmp.mapping.abort(),
                 ["<CR>"] = cmp.mapping.confirm({ select = false }),
             }),
 
