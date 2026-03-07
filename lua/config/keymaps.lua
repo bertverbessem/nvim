@@ -97,9 +97,6 @@ map("v", "J", ":m '>+1<CR>gv=gv")
 --Move selected lines up in visual mode
 map("v", "K", ":m '<-2<CR>gv=gv")
 
---Join lines in normal mode and move cursor to the end of the joined line
-map("n", "J", "mzJ`z")
-
 --Increment the number under the cursor in normal mode
 map("n", "+", "<C-a>")
 

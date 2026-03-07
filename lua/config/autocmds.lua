@@ -198,9 +198,10 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 })
 
 -- relativenumber on off
+local relative_number_group = vim.api.nvim_create_augroup("RelativeNumberToggle", { clear = true })
 vim.api.nvim_create_autocmd({ "BufEnter", "FocusGained", "InsertLeave", "CmdlineLeave", "WinEnter" }, {
     pattern = "*",
-    group = augroup,
+    group = relative_number_group,
     callback = function()
         if vim.o.nu and vim.api.nvim_get_mode().mode ~= "i" then
             vim.opt.relativenumber = true
@@ -210,7 +211,7 @@ vim.api.nvim_create_autocmd({ "BufEnter", "FocusGained", "InsertLeave", "Cmdline
 
 vim.api.nvim_create_autocmd({ "BufLeave", "FocusLost", "InsertEnter", "CmdlineEnter", "WinLeave" }, {
     pattern = "*",
-    group = augroup,
+    group = relative_number_group,
     callback = function()
         if vim.o.nu then
             vim.opt.relativenumber = false

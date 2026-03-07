@@ -165,44 +165,28 @@ return {
         config = function(_, opts)
             require("render-markdown").setup(opts)
 
-            -- Apply custom highlights after setup
+            local function apply_markdown_highlights()
+                local headings = {
+                    { "H1", "#d4be98" },
+                    { "H2", "#7daea3" },
+                    { "H3", "#d3869b" },
+                    { "H4", "#a9b665" },
+                    { "H5", "#89b4f5" },
+                    { "H6", "#e78a4e" },
+                }
+                for _, h in ipairs(headings) do
+                    vim.api.nvim_set_hl(0, "RenderMarkdown" .. h[1], { fg = h[2], bold = true })
+                    vim.api.nvim_set_hl(0, "RenderMarkdown" .. h[1] .. "Bg", { bg = "#3c3836", fg = h[2] })
+                end
+            end
+
             vim.api.nvim_create_autocmd("ColorScheme", {
                 pattern = "*",
-                callback = function()
-                    -- Markdown headings with vague-style colors
-                    vim.api.nvim_set_hl(0, "RenderMarkdownH1", { fg = "#d4be98", bold = true })
-                    vim.api.nvim_set_hl(0, "RenderMarkdownH2", { fg = "#7daea3", bold = true })
-                    vim.api.nvim_set_hl(0, "RenderMarkdownH3", { fg = "#d3869b", bold = true })
-                    vim.api.nvim_set_hl(0, "RenderMarkdownH4", { fg = "#a9b665", bold = true })
-                    vim.api.nvim_set_hl(0, "RenderMarkdownH5", { fg = "#89b4f5", bold = true })
-                    vim.api.nvim_set_hl(0, "RenderMarkdownH6", { fg = "#e78a4e", bold = true })
-
-                    -- Background highlights
-                    vim.api.nvim_set_hl(0, "RenderMarkdownH1Bg", { bg = "#3c3836", fg = "#d4be98" })
-                    vim.api.nvim_set_hl(0, "RenderMarkdownH2Bg", { bg = "#3c3836", fg = "#7daea3" })
-                    vim.api.nvim_set_hl(0, "RenderMarkdownH3Bg", { bg = "#3c3836", fg = "#d3869b" })
-                    vim.api.nvim_set_hl(0, "RenderMarkdownH4Bg", { bg = "#3c3836", fg = "#a9b665" })
-                    vim.api.nvim_set_hl(0, "RenderMarkdownH5Bg", { bg = "#3c3836", fg = "#89b4f5" })
-                    vim.api.nvim_set_hl(0, "RenderMarkdownH6Bg", { bg = "#3c3836", fg = "#e78a4e" })
-                end,
+                callback = apply_markdown_highlights,
             })
 
             -- Apply highlights immediately
-            vim.schedule(function()
-                vim.api.nvim_set_hl(0, "RenderMarkdownH1", { fg = "#d4be98", bold = true })
-                vim.api.nvim_set_hl(0, "RenderMarkdownH2", { fg = "#7daea3", bold = true })
-                vim.api.nvim_set_hl(0, "RenderMarkdownH3", { fg = "#d3869b", bold = true })
-                vim.api.nvim_set_hl(0, "RenderMarkdownH4", { fg = "#a9b665", bold = true })
-                vim.api.nvim_set_hl(0, "RenderMarkdownH5", { fg = "#89b4f5", bold = true })
-                vim.api.nvim_set_hl(0, "RenderMarkdownH6", { fg = "#e78a4e", bold = true })
-
-                vim.api.nvim_set_hl(0, "RenderMarkdownH1Bg", { bg = "#3c3836", fg = "#d4be98" })
-                vim.api.nvim_set_hl(0, "RenderMarkdownH2Bg", { bg = "#3c3836", fg = "#7daea3" })
-                vim.api.nvim_set_hl(0, "RenderMarkdownH3Bg", { bg = "#3c3836", fg = "#d3869b" })
-                vim.api.nvim_set_hl(0, "RenderMarkdownH4Bg", { bg = "#3c3836", fg = "#a9b665" })
-                vim.api.nvim_set_hl(0, "RenderMarkdownH5Bg", { bg = "#3c3836", fg = "#89b4f5" })
-                vim.api.nvim_set_hl(0, "RenderMarkdownH6Bg", { bg = "#3c3836", fg = "#e78a4e" })
-            end)
+            vim.schedule(apply_markdown_highlights)
         end,
     },
 }
