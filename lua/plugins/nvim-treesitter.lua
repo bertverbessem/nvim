@@ -54,6 +54,8 @@ return {
             "typescript",
             "vue",
             "yaml",
+            "groovy",
+            "nginx",
         })
     end,
 }

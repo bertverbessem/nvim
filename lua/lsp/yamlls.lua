@@ -8,7 +8,15 @@ vim.lsp.config("yamlls", {
     },
     settings = {
         yaml = {
-            -- your existing yaml settings
+            schemas = {
+                -- Bitbucket Pipelines
+                ["https://bitbucket.org/atlassian/bitbucket-pipelines-schema/raw/master/bitbucket-pipelines-schema.json"] = "bitbucket-pipelines.yml",
+                -- Docker Compose
+                ["https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json"] = {
+                    "docker-compose*.yml",
+                    "docker-compose*.yaml",
+                },
+            },
         },
     },
     -- Add root_dir pattern to avoid yamlls on ansible projects

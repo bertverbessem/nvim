@@ -16,6 +16,8 @@ return {
                 "jsonls",
                 "dockerls",
                 "terraformls",
+                "groovyls",
+                "nginx_language_server",
             },
         },
         -- dependencies = { "neovim/nvim-lspconfig" },
@@ -35,6 +37,7 @@ return {
                 "fixjson", -- JSON formatter
                 "yamlfmt", -- YAML formatter
                 "luacheck", -- lua linter
+                "tflint", -- Terraform linter
             },
             automatic_installation = true,
         },

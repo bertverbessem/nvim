@@ -17,6 +17,8 @@ return {
                 yaml = { "secretlint" },
                 ["yaml.ansible"] = { "secretlint" },
                 dockerfile = { "hadolint" },
+                terraform = { "tflint" },
+                hcl = { "tflint" },
             }
 
             -- Auto-lint on save and text change
