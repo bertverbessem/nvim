@@ -56,6 +56,8 @@ return {
             "yaml",
             "groovy",
             "nginx",
+            "php",
+            "twig",
         })
     end,
 }

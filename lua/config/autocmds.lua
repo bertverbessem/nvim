@@ -338,6 +338,8 @@ vim.api.nvim_create_autocmd("LspAttach", {
         keymap("n", "<leader>pd", "<cmd>lua vim.diagnostic.goto_prev()<CR>", opts) -- previous diagnostic
         keymap("n", "<leader>nd", "<cmd>lua vim.diagnostic.goto_next()<CR>", opts) -- next diagnostic
         keymap("n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>", opts) -- hover documentation
+        keymap("n", "<leader>gr", "<cmd>lua vim.lsp.buf.references()<CR>", opts) -- show all references
+        keymap("n", "<leader>gi", "<cmd>lua vim.lsp.buf.implementation()<CR>", opts) -- go to implementation
 
         -- -- fzf-lua keymaps
         -- keymap("n", "<leader>gd", "<cmd>FzfLua lsp_finder<CR>", opts) -- LSP Finder (definition + references)

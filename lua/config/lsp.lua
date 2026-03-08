@@ -9,6 +9,11 @@ local lsp_servers = {
     "dockerls",
     "terraformls",
     "yamlls",
+    "groovyls",
+    "nginx_language_server",
+    "docker_compose_language_service",
+    "ruff",
+    "intelephense",
 }
 
 for _, server in ipairs(lsp_servers) do
