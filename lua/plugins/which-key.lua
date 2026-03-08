@@ -9,8 +9,13 @@ return {
 	"folke/which-key.nvim",
 	event = "VeryLazy",
 	opts = {
-        preset = "modern", --classic, modern, helix
-    },
+		preset = "modern",
+		spec = {
+			{ "<leader>d", group = "Debug" },
+			{ "<leader>g", group = "Git" },
+			{ "<leader>h", group = "Git Hunks" },
+		},
+	},
 	keys = {
 		{
 			"<leader>?",
