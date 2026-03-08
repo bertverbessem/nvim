@@ -120,35 +120,6 @@ map("n", "<leader>yc", function()
     vim.notify("Current file path copied to clipboard")
 end, { desc = "Copy current filepath to clipboard" })
 
--- grugfar
-map({ "n", "x" }, "<leader>rl", function()
-    local search = vim.fn.getreg("/")
-    -- surround with \b if "word" search (such as when pressing `*`)
-    if search and vim.startswith(search, "\\<") and vim.endswith(search, "\\>") then
-        search = "\\b" .. search:sub(3, -3) .. "\\b"
-    end
-    require("grug-far").open({
-        prefills = {
-            search = search,
-            path = vim.fn.expand("%:p:h"),
-        },
-    })
-end, { desc = "grug-far: Search using @/ register value or visual selection" })
-
-map({ "n", "x" }, "<leader>ri", function()
-    require("grug-far").open(
-        { visualSelectionUsage = "operate-within-range" },
-        { prefills = { paths = vim.fn.expand("%:p:h") } }
-    )
-end, { desc = "grug-far: Search within range" })
-
-map({ "n", "x", "v" }, "<leader>rw", function()
-    require("grug-far").open({ prefills = { search = vim.fn.expand("<cword>"), paths = vim.fn.expand("%:p:h") } })
-end, { desc = "grug-far: current word" })
-
-map("n", "<leader>ro", function()
-    require("grug-far").open({ prefills = { paths = vim.fn.expand("%:p:h") } })
-end, { desc = "grug-far: open" })
 
 -- Helper: get indentation of current line
 local function get_indent(line)
@@ -330,18 +301,3 @@ vim.keymap.set({ "v", "n" }, "<leader>vsd", function()
     vim.notify("🔓 Vault content decrypted and replaced", vim.log.levels.INFO)
 end, { desc = "Decrypt vault content under cursor or selection" })
 
--- Snacks
--- floating terminal
-map("n", "<leader>ft", function()
-    require("snacks").terminal(nil, { cwd = vim.fs.root(0, { ".git", "package.json", "Makefile" }) or vim.fn.getcwd() })
-end, { desc = "Terminal (Root Dir)" })
-map("n", "<c-/>", function()
-    require("snacks").terminal(nil, { cwd = vim.fn.expand("%:p:h") })
-end, { desc = "Terminal (Current Dir)" })
-map("n", "<c-_>", function()
-    require("snacks").terminal(nil, { cwd = vim.fn.expand("%:p:h") })
-end, { desc = "which_key_ignore" })
-
--- Terminal Mappings
-map("t", "<C-/>", "<cmd>close<cr>", { desc = "Hide Terminal" })
-map("t", "<c-_>", "<cmd>close<cr>", { desc = "which_key_ignore" })

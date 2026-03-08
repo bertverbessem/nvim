@@ -32,8 +32,6 @@ return {
                 "stylua", -- Lua formatter
                 "shfmt", -- Shell formatter
                 "shellcheck", -- Shell linter
-                "black", -- Python formatter
-                "flake8", -- Python linter
                 "prettier", -- JS/TS/JSON formatter
                 "eslint_d", -- JS/TS linter
                 "gofumpt", -- Go formatter

@@ -9,7 +9,7 @@ return {
 
             lint.linters_by_ft = {
                 lua = { "luacheck" },
-                python = { "flake8" },
+                python = {},
                 go = { "revive" },
                 json = { "eslint_d" },
                 jsonc = { "eslint_d" },

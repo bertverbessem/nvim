@@ -128,6 +128,30 @@ return {
         },
     },
     keys = {
+        -- Terminal
+        {
+            "<leader>ft",
+            function()
+                require("snacks").terminal(nil, { cwd = vim.fs.root(0, { ".git", "package.json", "Makefile" }) or vim.fn.getcwd() })
+            end,
+            desc = "Terminal (Root Dir)",
+        },
+        {
+            "<c-/>",
+            function()
+                require("snacks").terminal(nil, { cwd = vim.fn.expand("%:p:h") })
+            end,
+            desc = "Terminal (Current Dir)",
+        },
+        {
+            "<c-_>",
+            function()
+                require("snacks").terminal(nil, { cwd = vim.fn.expand("%:p:h") })
+            end,
+            desc = "which_key_ignore",
+        },
+        { "<C-/>", "<cmd>close<cr>", mode = "t", desc = "Hide Terminal" },
+        { "<c-_>", "<cmd>close<cr>", mode = "t", desc = "which_key_ignore" },
         -- Top Pickers
         --     {
         --         "<leader><space>",
