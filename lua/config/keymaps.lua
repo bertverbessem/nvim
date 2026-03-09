@@ -168,6 +168,50 @@ vim.keymap.set("n", "<leader>vse", function()
     vim.notify("🔐 Encrypted " .. var_name, vim.log.levels.INFO)
 end, { desc = "Encrypt variable value under cursor" })
 
+-- ShellCheck disable helpers
+local function shellcheck_disable_line(lnum_0)
+    local diags = vim.diagnostic.get(0, { lnum = lnum_0 })
+    local codes = {}
+    local msgs = {}
+    local seen = {}
+    for _, d in ipairs(diags) do
+        if d.source == "shellcheck" and d.code and not seen[d.code] then
+            table.insert(codes, d.code)
+            table.insert(msgs, d.code .. ": " .. (d.message or ""))
+            seen[d.code] = true
+        end
+    end
+    if #codes == 0 then return false end
+    local line_text = vim.api.nvim_buf_get_lines(0, lnum_0, lnum_0 + 1, false)[1] or ""
+    local indent = line_text:match("^(%s*)") or ""
+    local desc = indent .. "# " .. table.concat(msgs, ", ")
+    local directive = indent .. "# shellcheck disable=" .. table.concat(codes, ",")
+    vim.api.nvim_buf_set_lines(0, lnum_0, lnum_0, false, { desc, directive })
+    return true
+end
+
+map("n", "<leader>xd", function()
+    local row = vim.api.nvim_win_get_cursor(0)[1] - 1
+    if not shellcheck_disable_line(row) then
+        vim.notify("No shellcheck diagnostics on this line", vim.log.levels.WARN)
+    end
+end, { desc = "ShellCheck: disable diagnostic on current line" })
+
+map("v", "<leader>xd", function()
+    local start_row = vim.fn.line("v") - 1
+    local end_row = vim.fn.line(".") - 1
+    if start_row > end_row then start_row, end_row = end_row, start_row end
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "x", false)
+    local inserted = 0
+    -- reverse iteration: inserting above a higher row doesn't affect lower row indices
+    for row = end_row, start_row, -1 do
+        if shellcheck_disable_line(row) then inserted = inserted + 1 end
+    end
+    if inserted == 0 then
+        vim.notify("No shellcheck diagnostics in selection", vim.log.levels.WARN)
+    end
+end, { desc = "ShellCheck: disable diagnostics on selected lines" })
+
 -- decrypt ansible vault string
 vim.keymap.set({ "v", "n" }, "<leader>vsd", function()
     local vault_lines = {}
