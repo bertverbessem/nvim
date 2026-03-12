@@ -132,7 +132,10 @@ return {
         {
             "<leader>ft",
             function()
-                require("snacks").terminal(nil, { cwd = vim.fs.root(0, { ".git", "package.json", "Makefile" }) or vim.fn.getcwd() })
+                require("snacks").terminal(
+                    nil,
+                    { cwd = vim.fs.root(0, { ".git", "package.json", "Makefile" }) or vim.fn.getcwd() }
+                )
             end,
             desc = "Terminal (Root Dir)",
         },
@@ -449,14 +452,14 @@ return {
         {
             "<leader>ff",
             function()
-                require("snacks").picker.files({ cwd = vim.fn.getcwd() })
+                require("snacks").picker.files({ cwd = vim.fn.getcwd(), hidden = true, ignored = true })
             end,
             desc = "Find Files",
         },
         {
             "<leader><leader>",
             function()
-                require("snacks").picker.files({ cwd = vim.fn.expand("%:p:h") })
+                require("snacks").picker.files({ cwd = vim.fn.expand("%:p:h"), hidden = true, ignored = true })
             end,
             desc = "Find Files (cwd)",
         },
