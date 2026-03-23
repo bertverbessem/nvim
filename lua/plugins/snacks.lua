@@ -18,6 +18,32 @@ return {
         picker = {
             enabled = true,
             ui_select = true,
+            actions = {
+                grep_in_results = function(picker)
+                    local selected = picker:selected()
+                    local items = (#selected > 0) and selected or picker:items()
+                    local files = {}
+                    for _, item in ipairs(items) do
+                        local path = item.file or item.path
+                        if path then
+                            table.insert(files, path)
+                        end
+                    end
+                    if #files == 0 then
+                        Snacks.notify.warn("No files in current picker")
+                        return
+                    end
+                    picker:close()
+                    Snacks.picker.grep({ dirs = files })
+                end,
+            },
+            win = {
+                input = {
+                    keys = {
+                        ["<C-g>"] = { "grep_in_results", mode = { "i", "n" } },
+                    },
+                },
+            },
             formatters = {
                 file = {
                     filename_first = false,
@@ -434,13 +460,13 @@ return {
         --         end,
         --         desc = "Quickfix List",
         --     },
-        --     {
-        --         "<leader>sR",
-        --         function()
-        --             require("snacks").picker.resume()
-        --         end,
-        --         desc = "Resume",
-        --     },
+        {
+            "<leader>sR",
+            function()
+                require("snacks").picker.resume()
+            end,
+            desc = "Resume",
+        },
         {
             "<leader>su",
             function()
@@ -452,14 +478,14 @@ return {
         {
             "<leader>ff",
             function()
-                require("snacks").picker.files({ cwd = vim.fn.getcwd(), hidden = true, ignored = true })
+                require("snacks").picker.files({ cwd = vim.fn.getcwd(), hidden = true, ignored = true, exclude = { ".venv", ".git", "node_modules", "__pycache__", ".cache" } })
             end,
             desc = "Find Files",
         },
         {
             "<leader><leader>",
             function()
-                require("snacks").picker.files({ cwd = vim.fn.expand("%:p:h"), hidden = true, ignored = true })
+                require("snacks").picker.files({ cwd = vim.fn.expand("%:p:h"), hidden = true, ignored = true, exclude = { ".venv", ".git", "node_modules", "__pycache__", ".cache" } })
             end,
             desc = "Find Files (cwd)",
         },
