@@ -15,9 +15,11 @@ return {
         vim.treesitter.language.register("terraform", "terraform-vars")
 
         vim.api.nvim_create_autocmd("FileType", {
-            pattern = { "yaml.ansible", "terraform-vars" },
-            callback = function()
-                vim.treesitter.start()
+            callback = function(ev)
+                local lang = vim.treesitter.language.get_lang(ev.match) or ev.match
+                if pcall(vim.treesitter.language.inspect, lang) then
+                    vim.treesitter.start(ev.buf)
+                end
             end,
         })
 
