@@ -17,6 +17,9 @@ map("n", "N", "Nzzzv", { desc = "Previous search result (centered)" })
 map("n", "<C-d>", "<C-d>zz", { desc = "Half page down (centered)" })
 map("n", "<C-u>", "<C-u>zz", { desc = "Half page up (centered)" })
 
+-- Zenmode
+map("n", "<leader>Z", "<cmd>ZenMode<CR>", { desc = "Zenmode" })
+
 -- Buffer navigation
 map("n", "<S-l>", "<Cmd>bnext<CR>", { desc = "Next buffer" })
 map("n", "<S-h>", "<Cmd>bprevious<CR>", { desc = "Previous buffer" })
@@ -120,7 +123,6 @@ map("n", "<leader>yc", function()
     vim.notify("Current file path copied to clipboard")
 end, { desc = "Copy current filepath to clipboard" })
 
-
 -- Helper: get indentation of current line
 local function get_indent(line)
     return line:match("^(%s*)") or ""
@@ -200,12 +202,16 @@ end, { desc = "ShellCheck: disable diagnostic on current line" })
 map("v", "<leader>xd", function()
     local start_row = vim.fn.line("v") - 1
     local end_row = vim.fn.line(".") - 1
-    if start_row > end_row then start_row, end_row = end_row, start_row end
+    if start_row > end_row then
+        start_row, end_row = end_row, start_row
+    end
     vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "x", false)
     local inserted = 0
     -- reverse iteration: inserting above a higher row doesn't affect lower row indices
     for row = end_row, start_row, -1 do
-        if shellcheck_disable_line(row) then inserted = inserted + 1 end
+        if shellcheck_disable_line(row) then
+            inserted = inserted + 1
+        end
     end
     if inserted == 0 then
         vim.notify("No shellcheck diagnostics in selection", vim.log.levels.WARN)
@@ -344,4 +350,3 @@ vim.keymap.set({ "v", "n" }, "<leader>vsd", function()
 
     vim.notify("🔓 Vault content decrypted and replaced", vim.log.levels.INFO)
 end, { desc = "Decrypt vault content under cursor or selection" })
-
