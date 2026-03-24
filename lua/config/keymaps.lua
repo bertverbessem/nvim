@@ -168,6 +168,7 @@ vim.keymap.set("n", "<leader>vse", function()
     -- Replace current line with multi-line vault block
     vim.api.nvim_buf_set_lines(0, line_nr - 1, line_nr, false, encrypted_lines)
     vim.notify("🔐 Encrypted " .. var_name, vim.log.levels.INFO)
+    vim.cmd("silent! w") -- Save the file
 end, { desc = "Encrypt variable value under cursor" })
 
 -- ShellCheck disable helpers
@@ -183,7 +184,9 @@ local function shellcheck_disable_line(lnum_0)
             seen[d.code] = true
         end
     end
-    if #codes == 0 then return false end
+    if #codes == 0 then
+        return false
+    end
     local line_text = vim.api.nvim_buf_get_lines(0, lnum_0, lnum_0 + 1, false)[1] or ""
     local indent = line_text:match("^(%s*)") or ""
     local desc = indent .. "# " .. table.concat(msgs, ", ")
@@ -349,4 +352,5 @@ vim.keymap.set({ "v", "n" }, "<leader>vsd", function()
     vim.api.nvim_win_set_cursor(0, { cursor_line, 0 })
 
     vim.notify("🔓 Vault content decrypted and replaced", vim.log.levels.INFO)
+    vim.cmd("silent! w") -- Save the file
 end, { desc = "Decrypt vault content under cursor or selection" })
