@@ -461,7 +461,7 @@ return {
         --         desc = "Quickfix List",
         --     },
         {
-            "<leader>sR",
+            "<leader>fR",
             function()
                 require("snacks").picker.resume()
             end,
@@ -478,14 +478,24 @@ return {
         {
             "<leader>ff",
             function()
-                require("snacks").picker.files({ cwd = vim.fn.getcwd(), hidden = true, ignored = true, exclude = { ".venv", ".git", "node_modules", "__pycache__", ".cache" } })
+                require("snacks").picker.files({
+                    cwd = vim.fn.getcwd(),
+                    hidden = true,
+                    ignored = true,
+                    exclude = { ".venv", ".git", "node_modules", "__pycache__", ".cache" },
+                })
             end,
             desc = "Find Files",
         },
         {
             "<leader><leader>",
             function()
-                require("snacks").picker.files({ cwd = vim.fn.expand("%:p:h"), hidden = true, ignored = true, exclude = { ".venv", ".git", "node_modules", "__pycache__", ".cache" } })
+                require("snacks").picker.files({
+                    cwd = vim.fn.expand("%:p:h"),
+                    hidden = true,
+                    ignored = true,
+                    exclude = { ".venv", ".git", "node_modules", "__pycache__", ".cache" },
+                })
             end,
             desc = "Find Files (cwd)",
         },
