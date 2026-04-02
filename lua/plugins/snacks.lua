@@ -509,7 +509,11 @@ return {
         {
             "<leader>fg",
             function()
-                require("snacks").picker.grep()
+                require("snacks").picker.grep({
+                    hidden = true,
+                    ignored = true,
+                    exclude = { ".venv", ".git", "node_modules", "__pycache__", ".cache" },
+                })
             end,
             desc = "Live Grep",
         },
