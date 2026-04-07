@@ -302,9 +302,7 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile", "BufEnter" }, {
 vim.api.nvim_create_autocmd("FileType", {
     pattern = "tmux",
     callback = function()
-        vim.schedule(function()
-            vim.cmd(":TSBufToggle highlight")
-        end)
+        vim.treesitter.stop(0)
     end,
 })
 -- Auto-lint on save and text change
