@@ -7,6 +7,7 @@
 
 return {
     "nvim-treesitter/nvim-treesitter",
+    commit = "90cd6580", -- until neovim 0.12 is stable
     build = ":TSUpdate",
     event = { "BufReadPost", "BufNewFile" },
     lazy = false,
