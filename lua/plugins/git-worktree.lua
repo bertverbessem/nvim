@@ -131,9 +131,10 @@ local function list_worktrees()
                     if input and input:lower() == "y" then
                         local result = vim.fn.system("git worktree remove " .. vim.fn.shellescape(item.path))
                         if vim.v.shell_error == 0 then
-                            -- Also delete the local branch
+                            -- Also delete the local and remote branch
                             if item.item.branch then
                                 vim.fn.system("git branch -d " .. vim.fn.shellescape(item.item.branch))
+                                vim.fn.system("git push -u origin --delete " .. vim.fn.shellescape(item.item.branch))
                             end
                             Snacks.notify.info("Removed worktree and branch: " .. item.label)
                             picker:close()
