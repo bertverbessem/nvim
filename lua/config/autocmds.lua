@@ -197,6 +197,16 @@ vim.api.nvim_create_autocmd("BufWritePost", {
     end,
 })
 
+-- Auto-reload files changed externally (e.g. by Claude Code)
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold" }, {
+    pattern = "*",
+    callback = function()
+        if vim.fn.getcmdwintype() == "" then
+            vim.cmd("checktime")
+        end
+    end,
+})
+
 -- relativenumber on off
 local relative_number_group = vim.api.nvim_create_augroup("RelativeNumberToggle", { clear = true })
 vim.api.nvim_create_autocmd({ "BufEnter", "FocusGained", "InsertLeave", "CmdlineLeave", "WinEnter" }, {
