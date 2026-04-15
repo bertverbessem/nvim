@@ -18,6 +18,13 @@ return {
         picker = {
             enabled = true,
             ui_select = true,
+            on_change = function(self, item)
+                if item and item.file and self.preview and self.preview.win then
+                    vim.schedule(function()
+                        self.preview.win:set_title(vim.fn.fnamemodify(item.file, ":~:."))
+                    end)
+                end
+            end,
             actions = {
                 grep_in_results = function(picker)
                     local selected = picker:selected()
@@ -47,7 +54,8 @@ return {
             formatters = {
                 file = {
                     filename_first = false,
-                    truncate = 100, -- truncate the file path to (roughly) this length
+                    -- truncate = 100, -- truncate the file path to (roughly) this length
+                    truncate = "center",
                 },
             },
             layouts = {
@@ -55,8 +63,8 @@ return {
                 default = {
                     layout = {
                         box = "horizontal",
-                        width = 0.70,
-                        height = 0.70,
+                        width = 0.90,
+                        height = 0.90,
                         {
                             box = "vertical",
                             border = "bold",
