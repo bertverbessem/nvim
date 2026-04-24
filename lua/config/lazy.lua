@@ -34,7 +34,17 @@ require("config.autocmds")
 require("config.spell")
 
 local plugins_dir = "plugins"
-vim.diagnostic.config({ virtual_text = { current_line = true } })
+vim.diagnostic.config({
+    virtual_text = { current_line = true },
+    signs = {
+        text = {
+            [vim.diagnostic.severity.ERROR] = " ",
+            [vim.diagnostic.severity.WARN] = " ",
+            [vim.diagnostic.severity.INFO] = "",
+            [vim.diagnostic.severity.HINT] = "",
+        },
+    },
+})
 -- vim.diagnostic.config({ virtual_text = false, virtual_lines = { current_line = true } })
 
 require("lazy").setup({

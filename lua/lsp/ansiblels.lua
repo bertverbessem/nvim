@@ -32,7 +32,7 @@ local python_path = find_binary("python3")
 local ansible_lint_path = find_binary("ansible-lint")
 
 vim.lsp.config("ansiblels", {
-    capabilities = require("cmp_nvim_lsp").default_capabilities(),
+    capabilities = require("blink.cmp").get_lsp_capabilities(),
     cmd = { "ansible-language-server", "--stdio" },
     settings = {
         ansible = {

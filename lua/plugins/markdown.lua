@@ -164,29 +164,6 @@ return {
         },
         config = function(_, opts)
             require("render-markdown").setup(opts)
-
-            local function apply_markdown_highlights()
-                local headings = {
-                    { "H1", "#d4be98" },
-                    { "H2", "#7daea3" },
-                    { "H3", "#d3869b" },
-                    { "H4", "#a9b665" },
-                    { "H5", "#89b4f5" },
-                    { "H6", "#e78a4e" },
-                }
-                for _, h in ipairs(headings) do
-                    vim.api.nvim_set_hl(0, "RenderMarkdown" .. h[1], { fg = h[2], bold = true })
-                    vim.api.nvim_set_hl(0, "RenderMarkdown" .. h[1] .. "Bg", { bg = "#3c3836", fg = h[2] })
-                end
-            end
-
-            vim.api.nvim_create_autocmd("ColorScheme", {
-                pattern = "*",
-                callback = apply_markdown_highlights,
-            })
-
-            -- Apply highlights immediately
-            vim.schedule(apply_markdown_highlights)
         end,
     },
 }

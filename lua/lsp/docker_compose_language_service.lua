@@ -6,7 +6,7 @@
 -- ================================================================================================
 
 vim.lsp.config("docker_compose_language_service", {
-    capabilities = require("cmp_nvim_lsp").default_capabilities(),
+    capabilities = require("blink.cmp").get_lsp_capabilities(),
     filetypes = { "yaml.docker-compose" },
     root_markers = { "docker-compose.yml", "docker-compose.yaml", ".git" },
 })

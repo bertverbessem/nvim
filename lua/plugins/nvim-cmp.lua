@@ -1,101 +1,87 @@
 -- ================================================================================================
--- TITLE : nvim-cmp
--- ABOUT : A completion plugin written in lua.
+-- TITLE : blink.cmp
+-- ABOUT : Performant, batteries-included completion plugin for Neovim.
 -- LINKS :
---   > github                             : https://github.com/hrsh7th/nvim-cmp
---   > lspkind (dep)                      : https://github.com/onsails/lspkind.nvim
---   > cmp_luasnip (dep)                  : https://github.com/saadparwaiz1/cmp_luasnip
---   > luasnip (dep)                      : https://github.com/L3MON4D3/LuaSnip
---   > friendly-snippets (dep)            : https://github.com/rafamadriz/friendly-snippets
---   > cmp-nvim-lsp (dep)                 : https://github.com/hrsh7th/cmp-nvim-lsp
---   > cmp-buffer (dep)                   : https://github.com/hrsh7th/cmp-buffer
---   > cmp-path (dep)                     : https://github.com/hrsh7th/cmp-path
---   > cmp-nvim-lsp-signature-help (dep)  : https://github.com/hrsh7th/cmp-nvim-lsp-signature-help
+--   > github                  : https://github.com/saghen/blink.cmp
+--   > luasnip (dep)           : https://github.com/L3MON4D3/LuaSnip
+--   > friendly-snippets (dep) : https://github.com/rafamadriz/friendly-snippets
 -- ================================================================================================
 
 return {
-    "hrsh7th/nvim-cmp",
+    "saghen/blink.cmp",
+    version = "1.*",
     dependencies = {
-        "onsails/lspkind.nvim", -- Adds VS Code-like pictograms/icons to the completion menu
-        "saadparwaiz1/cmp_luasnip", -- Enables LuaSnip as a source for nvim-cmp autocompletion
-        "L3MON4D3/LuaSnip", -- Snippet engine for Neovim (write and expand code snippets)
-        "rafamadriz/friendly-snippets", -- Large collection of pre-made snippets for various languages
-        "hrsh7th/cmp-nvim-lsp", -- nvim-cmp source for LSP-based autocompletion
-        "hrsh7th/cmp-buffer", -- nvim-cmp source for words from the current buffer
-        "hrsh7th/cmp-path", -- nvim-cmp source for filesystem paths
-        "hrsh7th/cmp-nvim-lsp-signature-help", -- function signatures
-        "lukas-reineke/cmp-under-comparator",
+        "L3MON4D3/LuaSnip",
+        "rafamadriz/friendly-snippets",
+        "onsails/lspkind.nvim",
     },
     config = function()
-        local lspkind = require("lspkind")
-        local cmp = require("cmp")
-        local luasnip = require("luasnip")
-
         require("luasnip.loaders.from_vscode").lazy_load()
         require("luasnip.loaders.from_lua").lazy_load({
-            paths = {
-                vim.fn.stdpath("config") .. "/lua/snippets",
-            },
+            paths = { vim.fn.stdpath("config") .. "/lua/snippets" },
         })
 
-        cmp.setup({
-            snippet = {
-                expand = function(args)
-                    luasnip.lsp_expand(args.body)
-                end,
+        require("blink.cmp").setup({
+            snippets = { preset = "luasnip" },
+            keymap = {
+                preset = "none",
+                ["<C-k>"] = { "select_prev", "fallback" },
+                ["<C-j>"] = { "select_next", "fallback" },
+                ["<C-u>"] = { "scroll_documentation_up", "fallback" },
+                ["<C-d>"] = { "scroll_documentation_down", "fallback" },
+                ["<C-e>"] = { "cancel", "fallback" },
+                ["<CR>"] = { "accept", "fallback" },
             },
-            window = {
-                completion = cmp.config.window.bordered(),
-                documentation = cmp.config.window.bordered(),
-            },
-
-            formatting = {
-                format = lspkind.cmp_format({
-                    -- before = require("tailwind-tools.cmp").lspkind_format,
-                    mode = "symbol_text",
-                    menu = {
-                        -- codeium = "",
-                        luasnip = "",
-                        buffer = "",
-                        path = "",
-                        nvim_lsp = "🅻",
+            completion = {
+                list = {
+                    selection = {
+                        preselect = false,
+                        auto_insert = false,
                     },
-                }),
-            },
-
-            mapping = cmp.mapping.preset.insert({
-                ["<C-k>"] = cmp.mapping.select_prev_item(),
-                ["<C-j>"] = cmp.mapping.select_next_item(),
-                ["<C-u>"] = cmp.mapping.scroll_docs(-4),
-                ["<C-d>"] = cmp.mapping.scroll_docs(4),
-["<C-e>"] = cmp.mapping.abort(),
-                ["<CR>"] = cmp.mapping.confirm({ select = false }),
-            }),
-
-            sources = {
-                -- { name = "codeium" },
-                { name = "luasnip" },
-                { name = "nvim_lsp" },
-                { name = "buffer" },
-                { name = "path" },
-                { name = "nvim_lsp_signature_help" },
-            },
-            sorting = {
-                comparators = {
-                    cmp.config.compare.offset,
-                    cmp.config.compare.exact,
-                    cmp.config.compare.score,
-                    cmp.config.compare.recently_used,
-                    require("cmp-under-comparator").under,
-                    cmp.config.compare.kind,
+                },
+                menu = {
+                    border = "rounded",
+                    draw = {
+                        columns = {
+                            { "kind_icon" },
+                            { "label", "label_description", gap = 1 },
+                            { "kind" },
+                        },
+                        components = {
+                            kind_icon = {
+                                text = function(ctx)
+                                    return " " .. require("lspkind").symbolic(ctx.kind, { mode = "symbol" }) .. " "
+                                end,
+                                highlight = function(ctx)
+                                    return ctx.kind_hl
+                                end,
+                            },
+                            kind = {
+                                text = function(ctx)
+                                    return "[" .. ctx.kind .. "]"
+                                end,
+                                highlight = function(ctx)
+                                    return ctx.kind_hl
+                                end,
+                            },
+                        },
+                    },
+                },
+                documentation = {
+                    auto_show = true,
+                    window = {
+                        border = "rounded",
+                    },
                 },
             },
-            matching = {
-                disallow_fuzzy_matching = true,
-                disallow_fullfuzzy_matching = true,
-                disallow_partial_fuzzy_matching = true,
-                disallow_partial_matching = false,
-                disallow_prefix_unmatching = true,
+            sources = {
+                default = { "lsp", "path", "snippets", "buffer" },
+            },
+            signature = {
+                enabled = true,
+                window = {
+                    border = "rounded",
+                },
             },
         })
     end,

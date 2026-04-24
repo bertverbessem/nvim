@@ -8,7 +8,7 @@ vim.lsp.config("lua_ls", {
     cmd = { "lua-language-server" },
     filetypes = { "lua" },
     root_markers = { ".luarc.json", ".luarc.jsonc", ".git" },
-    capabilities = require("cmp_nvim_lsp").default_capabilities(),
+    capabilities = require("blink.cmp").get_lsp_capabilities(),
     settings = {
         Lua = {
             runtime = { version = "LuaJIT" },
@@ -20,20 +20,6 @@ vim.lsp.config("lua_ls", {
             telemetry = { enable = false },
         },
     },
-    on_attach = function(client)
-        client.config.settings = {
-            Lua = {
-                runtime = { version = "LuaJIT" },
-                diagnostics = { globals = { "vim", "Snacks" } },
-                workspace = {
-                    library = { vim.env.VIMRUNTIME },
-                    checkThirdParty = false,
-                },
-                telemetry = { enable = false },
-            },
-        }
-        client.notify("workspace/didChangeConfiguration", { settings = client.config.settings })
-    end,
 })
 
 vim.lsp.enable("lua_ls")

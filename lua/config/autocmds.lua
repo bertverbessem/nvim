@@ -29,40 +29,6 @@ vim.api.nvim_create_autocmd("TextYankPost", {
     end,
 })
 
--- format on save using efm langserver and configured formatters
--- format on save using efm langserver and configured formatters
-local lsp_fmt_group = vim.api.nvim_create_augroup("FormatOnSaveGroup", { clear = true })
-
-vim.api.nvim_create_autocmd("BufWritePre", {
-    group = lsp_fmt_group,
-    callback = function(args)
-        local bufnr = args.buf
-        -- get all active clients for this buffer
-        local clients = vim.lsp.get_clients({ bufnr = bufnr })
-        -- filter for efm
-        local efm_clients = vim.tbl_filter(function(client)
-            return client.name == "efm"
-                and (
-                    client.server_capabilities.documentFormattingProvider
-                    or client.server_capabilities.documentRangeFormattingProvider
-                )
-        end, clients)
-
-        if vim.tbl_isempty(efm_clients) then
-            return
-        end
-
-        -- format with all eligible EFM clients
-        vim.lsp.buf.format({
-            bufnr = bufnr,
-            async = true,
-            filter = function(client)
-                return client.name == "efm"
-            end,
-        })
-    end,
-})
-
 -- Ansible file pattern
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile", "BufEnter", "BufWritePre" }, {
     group = vim.api.nvim_create_augroup("Ansible", { clear = true }),
@@ -94,6 +60,45 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile", "BufEnter", "BufWritePre"
 
         -- Set ansible-specific filetype
         vim.bo[args.buf].filetype = "yaml.ansible"
+
+        -- ansible-doc hover: open floating terminal with full ansible-doc output
+        local function ansible_doc_hover()
+            local line = vim.api.nvim_get_current_line()
+            local module = line:match("([%w_]+%.[%w_]+%.[%w_]+)%s*:")
+                or line:match("([%w_]+%.[%w_]+%.[%w_]+)")
+            if not module then
+                module = vim.fn.expand("<cWORD>"):gsub(":$", "")
+            end
+            if not module or module == "" then
+                vim.notify("No module found under cursor", vim.log.levels.WARN)
+                return
+            end
+            local width = math.floor(vim.o.columns * 0.85)
+            local height = math.floor(vim.o.lines * 0.80)
+            local buf = vim.api.nvim_create_buf(false, true)
+            vim.api.nvim_open_win(buf, true, {
+                relative = "editor",
+                width = width,
+                height = height,
+                row = math.floor((vim.o.lines - height) / 2),
+                col = math.floor((vim.o.columns - width) / 2),
+                style = "minimal",
+                border = "rounded",
+                title = " ansible-doc: " .. module .. " ",
+                title_pos = "center",
+            })
+            vim.fn.termopen("ansible-doc " .. module, {
+                on_exit = function()
+                    vim.api.nvim_buf_set_keymap(buf, "n", "q", "<cmd>close<cr>", { noremap = true, silent = true })
+                    vim.api.nvim_buf_set_keymap(buf, "n", "<Esc>", "<cmd>close<cr>", { noremap = true, silent = true })
+                end,
+            })
+            vim.api.nvim_buf_set_keymap(buf, "t", "q", "<C-\\><C-n><cmd>close<cr>", { noremap = true, silent = true })
+            vim.api.nvim_buf_set_keymap(buf, "t", "<Esc>", "<C-\\><C-n><cmd>close<cr>", { noremap = true, silent = true })
+            vim.cmd("startinsert")
+        end
+
+        vim.keymap.set("n", "<leader>ah", ansible_doc_hover, { buffer = args.buf, desc = "ansible-doc hover" })
     end,
 })
 
@@ -103,7 +108,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
         if not args.data or not args.data.client_id then
             return
         end
-        local client = vim.lsp.get_client_by_id(args.data.client_id)
+        local client = vim.lsp.get_clients({ id = args.data.client_id })[1]
         if not client then
             return
         end
@@ -315,18 +320,11 @@ vim.api.nvim_create_autocmd("FileType", {
         vim.treesitter.stop(0)
     end,
 })
--- Auto-lint on save and text change
-vim.api.nvim_create_autocmd({ "BufWritePost" }, {
-    callback = function()
-        require("lint").try_lint()
-    end,
-})
-
 -- Setup LSP keymaps using LspAttach autocmd (replaces deprecated on_attach)
 vim.api.nvim_create_autocmd("LspAttach", {
     group = vim.api.nvim_create_augroup("UserLspConfig", {}),
     callback = function(ev)
-        local client = vim.lsp.get_client_by_id(ev.data.client_id)
+        local client = vim.lsp.get_clients({ id = ev.data.client_id })[1]
         local bufnr = ev.buf
 
         local keymap = vim.keymap.set
@@ -343,19 +341,11 @@ vim.api.nvim_create_autocmd("LspAttach", {
         keymap("n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<CR>", opts) -- Rename symbol
         keymap("n", "<leader>D", "<cmd>lua vim.diagnostic.open_float({ scope = 'line' })<CR>", opts) -- Line diagnostics (float)
         keymap("n", "<leader>d", "<cmd>lua vim.diagnostic.open_float()<CR>", opts) -- Cursor diagnostics
-        keymap("n", "<leader>pd", "<cmd>lua vim.diagnostic.goto_prev()<CR>", opts) -- previous diagnostic
-        keymap("n", "<leader>nd", "<cmd>lua vim.diagnostic.goto_next()<CR>", opts) -- next diagnostic
+        keymap("n", "<leader>pd", "<cmd>lua vim.diagnostic.jump({ count = -1 })<CR>", opts)
+        keymap("n", "<leader>nd", "<cmd>lua vim.diagnostic.jump({ count = 1 })<CR>", opts)
         keymap("n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>", opts) -- hover documentation
         keymap("n", "<leader>gr", "<cmd>lua vim.lsp.buf.references()<CR>", opts) -- show all references
         keymap("n", "<leader>gi", "<cmd>lua vim.lsp.buf.implementation()<CR>", opts) -- go to implementation
-
-        -- -- fzf-lua keymaps
-        -- keymap("n", "<leader>gd", "<cmd>FzfLua lsp_finder<CR>", opts) -- LSP Finder (definition + references)
-        -- keymap("n", "<leader>gr", "<cmd>FzfLua lsp_references<CR>", opts) -- Show all references to the symbol under the cursor
-        -- keymap("n", "<leader>gt", "<cmd>FzfLua lsp_typedefs<CR>", opts) -- Jump to the type definition of the symbol under the cursor
-        -- keymap("n", "<leader>ds", "<cmd>FzfLua lsp_document_symbols<CR>", opts) -- List all symbols (functions, classes, etc.) in the current file
-        -- keymap("n", "<leader>ws", "<cmd>FzfLua lsp_workspace_symbols<CR>", opts) -- Search for any symbol across the entire project/workspace
-        -- keymap("n", "<leader>gi", "<cmd>FzfLua lsp_implementations<CR>", opts) -- Go to implementation
 
         -- Order Imports (if supported by the client LSP)
         if client and client.server_capabilities and client.server_capabilities.codeActionProvider then

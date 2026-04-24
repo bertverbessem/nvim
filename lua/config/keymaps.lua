@@ -24,12 +24,6 @@ map("n", "<leader>Z", "<cmd>ZenMode<CR>", { desc = "Zenmode" })
 map("n", "<S-l>", "<Cmd>bnext<CR>", { desc = "Next buffer" })
 map("n", "<S-h>", "<Cmd>bprevious<CR>", { desc = "Previous buffer" })
 
--- Better window navigation
-map("n", "<C-h>", "<C-w>h", { desc = "Move to left window" })
-map("n", "<C-j>", "<C-w>j", { desc = "Move to bottom window" })
-map("n", "<C-k>", "<C-w>k", { desc = "Move to top window" })
-map("n", "<C-l>", "<C-w>l", { desc = "Move to right window" })
-
 -- Splitting & Resizing
 map("n", "<leader>sv", "<Cmd>vsplit<CR>", { desc = "Split window vertically" })
 map("n", "<leader>sx", "<Cmd>split<CR>", { desc = "Split window horizontally" })
@@ -52,14 +46,6 @@ map("n", "<leader>rc", "<Cmd>e ~/.config/nvim/init.lua<CR>", { desc = "Edit conf
 map("n", "<leader>F", "<Cmd>NvimTreeFocus<CR>", { desc = "Focus on File Explorer" })
 map("n", "<leader>e", "<Cmd>NvimTreeToggle<CR>", { desc = "Toggle File Explorer" })
 
--- Find files inside ~/.config
--- map(
---     "n",
---     "<leader>fc",
---     "<cmd>FzfLua files search_paths={'~/.config/nvim','~/.config/radleynvim'} cwd=~/.config<CR>",
---     { desc = "Find files in nvim and radleynvim" }
--- )
-
 -- escape
 map("i", "jk", "<Esc>", { desc = "Normal mode" })
 
@@ -71,7 +57,7 @@ map("n", "<leader>vr", function()
     require("gitsigns").reset_buffer()
     vim.cmd("silent! e")
     vim.cmd("silent! w") -- Save the file
-end, { desc = "[Vault] [R]e-encrypt" })
+end, { desc = "[V]ault [R]eset to git version" })
 
 --Encrypt a file using Ansible Vault
 map(
@@ -107,7 +93,7 @@ map("n", "+", "<C-a>")
 map("n", "-", "<C-x>")
 
 --Delete word without affecting the system clipboard
-map("n", "dw", 'vb"_d', { desc = "Delete [W]ord" })
+map("n", "dw", '"_dw', { desc = "Delete [W]ord" })
 
 map({ "n", "v", "x" }, "<leader>y", [["*y]], { desc = "Yank to clipboard" }) -- Yank to clipboard
 map("n", "<leader>yy", [["+yg_]], { desc = "Yank line around" }) -- Normal mode: Yank entire line to system clipboard (including trailing whitespace)

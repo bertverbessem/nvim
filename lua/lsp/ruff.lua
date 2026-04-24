@@ -7,7 +7,7 @@
 -- ================================================================================================
 
 vim.lsp.config("ruff", {
-    capabilities = require("cmp_nvim_lsp").default_capabilities(),
+    capabilities = require("blink.cmp").get_lsp_capabilities(),
     filetypes = { "python" },
     init_options = {
         settings = {
