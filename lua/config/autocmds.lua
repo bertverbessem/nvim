@@ -75,16 +75,18 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile", "BufEnter", "BufWritePre"
             return module
         end
 
-        local function show_ansible_float(lines, title)
+        local function show_ansible_float(lines, title, ft)
             if #lines == 0 then
                 vim.notify("No output found", vim.log.levels.WARN)
                 return
             end
             local width = math.floor(vim.o.columns * 0.85)
             local height = math.floor(vim.o.lines * 0.80)
-            local buf = vim.api.nvim_create_buf(false, true)
-            vim.bo[buf].buftype = "nofile"
+            local buf = vim.api.nvim_create_buf(false, false)
             vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+            if ft == "yaml.ansible" then
+                vim.api.nvim_buf_set_name(buf, vim.fn.getcwd() .. string.format("/.ansible-doc-%d.yml", buf))
+            end
             vim.api.nvim_open_win(buf, true, {
                 relative = "editor",
                 width = width,
@@ -96,8 +98,25 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile", "BufEnter", "BufWritePre"
                 title = title,
                 title_pos = "center",
             })
-            vim.bo[buf].filetype = "yaml.ansible"
+            vim.b[buf].ansible_doc_float = true
+            vim.bo[buf].filetype = ft or "yaml"
+            if ft == "help" then
+                local win = vim.api.nvim_get_current_win()
+                vim.fn.matchadd("Title", "^>.*$", 10, -1, { window = win })
+                vim.fn.matchadd("Title", "^[A-Z][A-Z %]*:.*$", 10, -1, { window = win })
+                vim.fn.matchadd("Identifier", "^   \\zs\\S\\+", 10, -1, { window = win })
+                vim.fn.matchadd("Type", "\\<type:\\s*\\zs\\S\\+", 10, -1, { window = win })
+                vim.fn.matchadd("Number", "\\<default:\\s*\\zs\\S\\+", 10, -1, { window = win })
+                vim.fn.matchadd("Special", "`[^`]\\+'", 10, -1, { window = win })
+                vim.fn.matchadd("WarningMsg", "\\<required\\>", 10, -1, { window = win })
+                vim.fn.matchadd("Comment", "\\<aliases:\\s*\\zs.*$", 10, -1, { window = win })
+                vim.fn.matchadd("String", "\\<returned:\\s*\\zs.*$", 10, -1, { window = win })
+                vim.fn.matchadd("Comment", "^  \\* note:.*$", 10, -1, { window = win })
+            end
+            vim.bo[buf].bufhidden = "wipe"
+            vim.bo[buf].swapfile = false
             vim.bo[buf].modifiable = false
+            vim.bo[buf].modified = false
             vim.api.nvim_buf_set_keymap(buf, "n", "q", "<cmd>close<cr>", { noremap = true, silent = true })
             vim.api.nvim_buf_set_keymap(buf, "n", "<Esc>", "<cmd>close<cr>", { noremap = true, silent = true })
         end
@@ -114,7 +133,7 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile", "BufEnter", "BufWritePre"
                 end,
                 on_exit = function()
                     vim.schedule(function()
-                        show_ansible_float(lines, " ansible-doc: " .. module .. " ")
+                        show_ansible_float(lines, " ansible-doc: " .. module .. " ", "help")
                     end)
                 end,
             })
@@ -129,8 +148,12 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile", "BufEnter", "BufWritePre"
                 on_stdout = function(_, data)
                     for _, line in ipairs(data) do
                         local clean = line:gsub("\27%[[%d;]*m", "")
-                        if clean:match("EXAMPLES") then in_examples = true end
-                        if in_examples then table.insert(lines, clean) end
+                        if in_examples and clean:match("^%u[%u%s]+:$") then break end
+                        if in_examples then
+                            clean = clean:gsub("(:%s+)[Yy][Ee][Ss](%s*$)", "%1true%2")
+                            clean = clean:gsub("(:%s+)[Nn][Oo](%s*$)", "%1false%2")
+                            table.insert(lines, clean)
+                        elseif clean:match("^EXAMPLES:$") then in_examples = true end
                     end
                 end,
                 on_exit = function()
@@ -139,7 +162,7 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile", "BufEnter", "BufWritePre"
                             vim.notify("No EXAMPLES section found for " .. module, vim.log.levels.WARN)
                             return
                         end
-                        show_ansible_float(lines, " ansible-doc examples: " .. module .. " ")
+                        show_ansible_float(lines, " ansible-doc examples: " .. module .. " ", "yaml.ansible")
                     end)
                 end,
             })
@@ -163,6 +186,11 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
         if client.name == "yamlls" and vim.bo[args.buf].filetype == "yaml.ansible" then
             client:stop()
+        end
+
+        if client.name == "ansiblels" and vim.b[args.buf].ansible_doc_float then
+            vim.diagnostic.enable(false, { bufnr = args.buf })
+            vim.diagnostic.reset(nil, args.buf)
         end
     end,
 })
