@@ -75,68 +75,12 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile", "BufEnter", "BufWritePre"
             return module
         end
 
-        local function show_ansible_float(lines, title, ft)
-            if #lines == 0 then
-                vim.notify("No output found", vim.log.levels.WARN)
-                return
-            end
-            local width = math.floor(vim.o.columns * 0.85)
-            local height = math.floor(vim.o.lines * 0.80)
-            local buf = vim.api.nvim_create_buf(false, false)
-            vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
-            if ft == "yaml.ansible" then
-                vim.api.nvim_buf_set_name(buf, vim.fn.getcwd() .. string.format("/.ansible-doc-%d.yml", buf))
-            end
-            vim.api.nvim_open_win(buf, true, {
-                relative = "editor",
-                width = width,
-                height = height,
-                row = math.floor((vim.o.lines - height) / 2),
-                col = math.floor((vim.o.columns - width) / 2),
-                style = "minimal",
-                border = "rounded",
-                title = title,
-                title_pos = "center",
-            })
-            vim.b[buf].ansible_doc_float = true
-            vim.bo[buf].filetype = ft or "yaml"
-            if ft == "help" then
-                local win = vim.api.nvim_get_current_win()
-                vim.fn.matchadd("Title", "^>.*$", 10, -1, { window = win })
-                vim.fn.matchadd("Title", "^[A-Z][A-Z %]*:.*$", 10, -1, { window = win })
-                vim.fn.matchadd("Identifier", "^   \\zs\\S\\+", 10, -1, { window = win })
-                vim.fn.matchadd("Type", "\\<type:\\s*\\zs\\S\\+", 10, -1, { window = win })
-                vim.fn.matchadd("Number", "\\<default:\\s*\\zs\\S\\+", 10, -1, { window = win })
-                vim.fn.matchadd("Special", "`[^`]\\+'", 10, -1, { window = win })
-                vim.fn.matchadd("WarningMsg", "\\<required\\>", 10, -1, { window = win })
-                vim.fn.matchadd("Comment", "\\<aliases:\\s*\\zs.*$", 10, -1, { window = win })
-                vim.fn.matchadd("String", "\\<returned:\\s*\\zs.*$", 10, -1, { window = win })
-                vim.fn.matchadd("Comment", "^  \\* note:.*$", 10, -1, { window = win })
-            end
-            vim.bo[buf].bufhidden = "wipe"
-            vim.bo[buf].swapfile = false
-            vim.bo[buf].modifiable = false
-            vim.bo[buf].modified = false
-            vim.api.nvim_buf_set_keymap(buf, "n", "q", "<cmd>close<cr>", { noremap = true, silent = true })
-            vim.api.nvim_buf_set_keymap(buf, "n", "<Esc>", "<cmd>close<cr>", { noremap = true, silent = true })
-        end
+        local doc = require("config.doc-float")
 
         local function ansible_doc_hover()
             local module = get_ansible_module()
             if not module then return end
-            local lines = {}
-            vim.fn.jobstart({ "ansible-doc", module }, {
-                on_stdout = function(_, data)
-                    for _, line in ipairs(data) do
-                        table.insert(lines, (line:gsub("\27%[[%d;]*m", "")))
-                    end
-                end,
-                on_exit = function()
-                    vim.schedule(function()
-                        show_ansible_float(lines, " ansible-doc: " .. module .. " ", "help")
-                    end)
-                end,
-            })
+            doc.run_cmd({ "ansible-doc", module }, " ansible-doc: " .. module .. " ", "help", { matchadd = doc.ansible_help_hl })
         end
 
         local function ansible_doc_examples()
@@ -162,7 +106,7 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile", "BufEnter", "BufWritePre"
                             vim.notify("No EXAMPLES section found for " .. module, vim.log.levels.WARN)
                             return
                         end
-                        show_ansible_float(lines, " ansible-doc examples: " .. module .. " ", "yaml.ansible")
+                        doc.show(lines, " ansible-doc examples: " .. module .. " ", "yaml.ansible")
                     end)
                 end,
             })
@@ -188,7 +132,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
             client:stop()
         end
 
-        if client.name == "ansiblels" and vim.b[args.buf].ansible_doc_float then
+        if vim.b[args.buf].doc_float then
             vim.diagnostic.enable(false, { bufnr = args.buf })
             vim.diagnostic.reset(nil, args.buf)
         end
@@ -451,5 +395,124 @@ vim.api.nvim_create_autocmd({ "BufNewFile", "BufReadPost" }, {
     pattern = { ".env*", ".docker.env*" },
     callback = function(e)
         vim.diagnostic.enable(false, { bufnr = e.buf })
+    end,
+})
+
+-- ================================================================================================
+-- Documentation floats for various filetypes
+-- ================================================================================================
+local doc = require("config.doc-float")
+
+-- Bash/shell: man pages
+vim.api.nvim_create_autocmd("FileType", {
+    group = vim.api.nvim_create_augroup("BashDocFloat", { clear = true }),
+    pattern = { "sh", "bash", "zsh" },
+    callback = function(args)
+        vim.keymap.set("n", "<leader>ah", function()
+            local word = vim.fn.expand("<cword>")
+            if word == "" then return end
+            doc.run_cmd({ "sh", "-c", "man " .. vim.fn.shellescape(word) .. " | col -b" }, " man " .. word .. " ", "man", { matchadd = doc.man_hl })
+        end, { buffer = args.buf, desc = "man page" })
+    end,
+})
+
+-- Python: pydoc
+vim.api.nvim_create_autocmd("FileType", {
+    group = vim.api.nvim_create_augroup("PythonDocFloat", { clear = true }),
+    pattern = "python",
+    callback = function(args)
+        vim.keymap.set("n", "<leader>ah", function()
+            local word = vim.fn.expand("<cWORD>")
+            word = word:gsub("[^%w_.]", "")
+            if word == "" then return end
+            doc.run_cmd({ "python3", "-m", "pydoc", word }, " pydoc " .. word .. " ", "help")
+        end, { buffer = args.buf, desc = "pydoc" })
+    end,
+})
+
+-- Terraform: terraform providers schema
+vim.api.nvim_create_autocmd("FileType", {
+    group = vim.api.nvim_create_augroup("TerraformDocFloat", { clear = true }),
+    pattern = { "terraform", "hcl" },
+    callback = function(args)
+        vim.keymap.set("n", "<leader>ah", function()
+            local word = vim.fn.expand("<cWORD>")
+            word = word:gsub('["%s]', "")
+            if word == "" then return end
+            doc.run_cmd(
+                { "terraform", "providers", "schema", "-json" },
+                " terraform: " .. word .. " ",
+                "json",
+                {
+                    filter = function(lines)
+                        local ok, data = pcall(vim.json.decode, table.concat(lines, "\n"))
+                        if not ok or not data then return { "No schema found for " .. word } end
+                        local result = {}
+                        local function search(tbl, target, path)
+                            for k, v in pairs(tbl) do
+                                if type(k) == "string" and k:find(target, 1, true) then
+                                    table.insert(result, "## " .. (path and path .. "." or "") .. k)
+                                    table.insert(result, "")
+                                    if type(v) == "table" and v.block then
+                                        local attrs = v.block.attributes or {}
+                                        for name, attr in pairs(attrs) do
+                                            local req = attr.required and " (required)" or " (optional)"
+                                            local tp = attr.type or "unknown"
+                                            if type(tp) ~= "string" then tp = vim.json.encode(tp) end
+                                            table.insert(result, string.format("* `%s` — %s%s", name, tp, req))
+                                            if attr.description then
+                                                table.insert(result, "  " .. attr.description)
+                                            end
+                                            table.insert(result, "")
+                                        end
+                                    end
+                                elseif type(v) == "table" then
+                                    search(v, target, (path and path .. "." or "") .. k)
+                                end
+                            end
+                        end
+                        search(data, word, nil)
+                        if #result == 0 then return { "No schema found for: " .. word } end
+                        return result
+                    end,
+                }
+            )
+        end, { buffer = args.buf, desc = "terraform schema" })
+    end,
+})
+
+-- Kubernetes: kubectl explain
+vim.api.nvim_create_autocmd("FileType", {
+    group = vim.api.nvim_create_augroup("KubernetesDocFloat", { clear = true }),
+    pattern = "yaml",
+    callback = function(args)
+        local name = vim.api.nvim_buf_get_name(args.buf)
+        local lines = vim.api.nvim_buf_get_lines(args.buf, 0, 10, false)
+        local is_k8s = false
+        for _, line in ipairs(lines) do
+            if line:match("^apiVersion:") or line:match("^kind:") then
+                is_k8s = true
+                break
+            end
+        end
+        if not is_k8s and not name:match("k8s") and not name:match("kube") then return end
+
+        vim.keymap.set("n", "<leader>ah", function()
+            local word = vim.fn.expand("<cword>")
+            if word == "" then return end
+            local kind = nil
+            local buf_lines = vim.api.nvim_buf_get_lines(args.buf, 0, 20, false)
+            for _, line in ipairs(buf_lines) do
+                local k = line:match("^kind:%s*(%S+)")
+                if k then kind = k break end
+            end
+            local resource = kind and (kind .. "." .. word) or word
+            doc.run_cmd(
+                { "kubectl", "explain", resource, "--recursive=false" },
+                " kubectl explain " .. resource .. " ",
+                "help",
+                { matchadd = doc.kubectl_hl }
+            )
+        end, { buffer = args.buf, desc = "kubectl explain" })
     end,
 })
