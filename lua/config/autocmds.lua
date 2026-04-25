@@ -61,8 +61,7 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile", "BufEnter", "BufWritePre"
         -- Set ansible-specific filetype
         vim.bo[args.buf].filetype = "yaml.ansible"
 
-        -- ansible-doc hover: open floating terminal with full ansible-doc output
-        local function ansible_doc_hover()
+        local function get_ansible_module()
             local line = vim.api.nvim_get_current_line()
             local module = line:match("([%w_]+%.[%w_]+%.[%w_]+)%s*:")
                 or line:match("([%w_]+%.[%w_]+%.[%w_]+)")
@@ -71,11 +70,21 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile", "BufEnter", "BufWritePre"
             end
             if not module or module == "" then
                 vim.notify("No module found under cursor", vim.log.levels.WARN)
+                return nil
+            end
+            return module
+        end
+
+        local function show_ansible_float(lines, title)
+            if #lines == 0 then
+                vim.notify("No output found", vim.log.levels.WARN)
                 return
             end
             local width = math.floor(vim.o.columns * 0.85)
             local height = math.floor(vim.o.lines * 0.80)
             local buf = vim.api.nvim_create_buf(false, true)
+            vim.bo[buf].buftype = "nofile"
+            vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
             vim.api.nvim_open_win(buf, true, {
                 relative = "editor",
                 width = width,
@@ -84,21 +93,60 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile", "BufEnter", "BufWritePre"
                 col = math.floor((vim.o.columns - width) / 2),
                 style = "minimal",
                 border = "rounded",
-                title = " ansible-doc: " .. module .. " ",
+                title = title,
                 title_pos = "center",
             })
-            vim.fn.termopen("ansible-doc " .. module, {
+            vim.bo[buf].filetype = "yaml.ansible"
+            vim.bo[buf].modifiable = false
+            vim.api.nvim_buf_set_keymap(buf, "n", "q", "<cmd>close<cr>", { noremap = true, silent = true })
+            vim.api.nvim_buf_set_keymap(buf, "n", "<Esc>", "<cmd>close<cr>", { noremap = true, silent = true })
+        end
+
+        local function ansible_doc_hover()
+            local module = get_ansible_module()
+            if not module then return end
+            local lines = {}
+            vim.fn.jobstart({ "ansible-doc", module }, {
+                on_stdout = function(_, data)
+                    for _, line in ipairs(data) do
+                        table.insert(lines, (line:gsub("\27%[[%d;]*m", "")))
+                    end
+                end,
                 on_exit = function()
-                    vim.api.nvim_buf_set_keymap(buf, "n", "q", "<cmd>close<cr>", { noremap = true, silent = true })
-                    vim.api.nvim_buf_set_keymap(buf, "n", "<Esc>", "<cmd>close<cr>", { noremap = true, silent = true })
+                    vim.schedule(function()
+                        show_ansible_float(lines, " ansible-doc: " .. module .. " ")
+                    end)
                 end,
             })
-            vim.api.nvim_buf_set_keymap(buf, "t", "q", "<C-\\><C-n><cmd>close<cr>", { noremap = true, silent = true })
-            vim.api.nvim_buf_set_keymap(buf, "t", "<Esc>", "<C-\\><C-n><cmd>close<cr>", { noremap = true, silent = true })
-            vim.cmd("startinsert")
+        end
+
+        local function ansible_doc_examples()
+            local module = get_ansible_module()
+            if not module then return end
+            local lines = {}
+            local in_examples = false
+            vim.fn.jobstart({ "ansible-doc", module }, {
+                on_stdout = function(_, data)
+                    for _, line in ipairs(data) do
+                        local clean = line:gsub("\27%[[%d;]*m", "")
+                        if clean:match("EXAMPLES") then in_examples = true end
+                        if in_examples then table.insert(lines, clean) end
+                    end
+                end,
+                on_exit = function()
+                    vim.schedule(function()
+                        if #lines == 0 then
+                            vim.notify("No EXAMPLES section found for " .. module, vim.log.levels.WARN)
+                            return
+                        end
+                        show_ansible_float(lines, " ansible-doc examples: " .. module .. " ")
+                    end)
+                end,
+            })
         end
 
         vim.keymap.set("n", "<leader>ah", ansible_doc_hover, { buffer = args.buf, desc = "ansible-doc hover" })
+        vim.keymap.set("n", "<leader>ae", ansible_doc_examples, { buffer = args.buf, desc = "ansible-doc examples" })
     end,
 })
 

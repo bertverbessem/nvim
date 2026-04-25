@@ -7,7 +7,7 @@
 
 return {
     "nvim-treesitter/nvim-treesitter",
-    commit = "90cd6580", -- until neovim 0.12 is stable
+    branch = "main",
     build = ":TSUpdate",
     event = { "BufReadPost", "BufNewFile" },
     lazy = false,
@@ -20,22 +20,9 @@ return {
                 local lang = vim.treesitter.language.get_lang(ev.match) or ev.match
                 if pcall(vim.treesitter.language.inspect, lang) then
                     vim.treesitter.start(ev.buf)
+                    vim.bo[ev.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
                 end
             end,
-        })
-
-        require("nvim-treesitter").setup({
-            highlight = { enable = true },
-            indent = { enable = true },
-            incremental_selection = {
-                enable = true,
-                keymaps = {
-                    init_selection = "<CR>",
-                    node_incremental = "<CR>",
-                    scope_incremental = "<TAB>",
-                    node_decremental = "<S-TAB>",
-                },
-            },
         })
 
         require("nvim-treesitter").install({

@@ -16,7 +16,7 @@ return {
             },
         },
         notify = {
-            enabled = true,
+            enabled = false,
         },
         messages = {
             enabled = true,
