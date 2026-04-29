@@ -29,8 +29,9 @@ return {
         local picker_exclude = { ".venv", ".git", "node_modules", "__pycache__", ".cache" }
 
         require("neo-tree").setup({
+            popup_border_style = "rounded",
             close_if_last_window = true,
-            use_popups_for_input = false,
+            -- use_popups_for_input = false,
             window = {
                 mappings = {
                     ["s"] = "noop",
