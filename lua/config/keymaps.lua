@@ -43,8 +43,8 @@ map("n", "J", "mzJ`z", { desc = "Join lines and keep cursor position" })
 map("n", "<leader>rc", "<Cmd>e ~/.config/nvim/init.lua<CR>", { desc = "Edit config" })
 
 -- File Explorer
-map("n", "<leader>F", "<Cmd>NvimTreeFocus<CR>", { desc = "Focus on File Explorer" })
-map("n", "<leader>e", "<Cmd>NvimTreeToggle<CR>", { desc = "Toggle File Explorer" })
+map("n", "<leader>F", "<Cmd>Neotree focus<CR>", { desc = "Focus on File Explorer" })
+map("n", "<leader>e", "<Cmd>Neotree toggle<CR>", { desc = "Toggle File Explorer" })
 
 -- escape
 map("i", "jk", "<Esc>", { desc = "Normal mode" })
