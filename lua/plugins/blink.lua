@@ -10,6 +10,7 @@
 return {
     "saghen/blink.cmp",
     version = "1.*",
+    event = { "InsertEnter", "CmdlineEnter" },
     dependencies = {
         "L3MON4D3/LuaSnip",
         "rafamadriz/friendly-snippets",

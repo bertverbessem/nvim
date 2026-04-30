@@ -10,7 +10,6 @@ return {
     branch = "main",
     build = ":TSUpdate",
     event = { "BufReadPost", "BufNewFile" },
-    lazy = false,
     config = function()
         vim.treesitter.language.register("yaml", "yaml.ansible")
         vim.treesitter.language.register("terraform", "terraform-vars")

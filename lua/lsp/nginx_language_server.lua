@@ -5,7 +5,7 @@
 -- ================================================================================================
 
 vim.lsp.config("nginx_language_server", {
-    capabilities = require("blink.cmp").get_lsp_capabilities(),
+    capabilities = require("config.capabilities").get(),
     filetypes = { "nginx" },
     root_markers = { "nginx.conf", ".git" },
 })

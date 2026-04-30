@@ -7,7 +7,7 @@
 -- ================================================================================================
 
 vim.lsp.config("groovyls", {
-    capabilities = require("blink.cmp").get_lsp_capabilities(),
+    capabilities = require("config.capabilities").get(),
     filetypes = { "groovy" },
     root_markers = { "Jenkinsfile", ".git", "build.gradle", "pom.xml", "settings.gradle" },
 })

@@ -5,7 +5,7 @@
 -- ================================================================================================
 
 vim.lsp.config("dockerls", {
-    capabilities = require("blink.cmp").get_lsp_capabilities(),
+    capabilities = require("config.capabilities").get(),
     filetypes = { "dockerfile" },
 })
 

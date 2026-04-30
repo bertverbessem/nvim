@@ -5,7 +5,7 @@
 -- ================================================================================================
 
 vim.lsp.config("terraformls", {
-    capabilities = require("blink.cmp").get_lsp_capabilities(),
+    capabilities = require("config.capabilities").get(),
     filetypes = { "terraform", "terraform-vars", "hcl" },
     root_markers = { ".terraform", ".git" },
 })

@@ -4,7 +4,6 @@ return {
     { "echasnovski/mini.icons" },
   },
   cmd = { "Oil" },
-  lazy = false,
   opts = {
     keymaps = {
       ["g?"] = { "actions.show_help", mode = "n" },

@@ -53,14 +53,23 @@ require("lazy").setup({
     spec = {
         { import = plugins_dir },
     },
-    rtp = {
-        disabled_plugins = {
-            "netrw",
-            "netrwPlugin",
+    performance = {
+        rtp = {
+            disabled_plugins = {
+                "netrw", "netrwPlugin", "netrwSettings", "netrwFileHandlers",
+                "gzip", "zip", "zipPlugin", "tar", "tarPlugin",
+                "getscript", "getscriptPlugin", "vimball", "vimballPlugin",
+                "2html_plugin", "tohtml", "logipat", "rrhelper",
+                "tutor", "rplugin",
+            },
         },
     },
     install = { colorscheme = { "vague" } },
     checker = { enabled = false },
 })
--- Load LSP configs AFTER plugins
-require("config.lsp")
+vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
+    once = true,
+    callback = function()
+        require("config.lsp")
+    end,
+})

@@ -10,7 +10,6 @@
 return {
     "neovim/nvim-lspconfig",
     dependencies = {
-        { "mason-org/mason.nvim", opts = {} }, -- LSP/DAP/Linter installer & manager
-        "saghen/blink.cmp", -- completion plugin providing LSP capabilities
+        { "mason-org/mason.nvim", opts = {} },
     },
 }

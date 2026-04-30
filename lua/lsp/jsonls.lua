@@ -5,7 +5,7 @@
 -- ================================================================================================
 
 vim.lsp.config("jsonls", {
-    capabilities = require("blink.cmp").get_lsp_capabilities(),
+    capabilities = require("config.capabilities").get(),
     filetypes = { "json", "jsonc" },
 })
 vim.lsp.enable("jsonls")

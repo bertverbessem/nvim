@@ -5,7 +5,7 @@
 -- ================================================================================================
 
 vim.lsp.config("gopls", {
-    capabilities = require("blink.cmp").get_lsp_capabilities(),
+    capabilities = require("config.capabilities").get(),
     filetypes = { "go" },
 })
 vim.lsp.enable("gopls")

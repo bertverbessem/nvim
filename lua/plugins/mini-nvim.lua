@@ -6,11 +6,12 @@
 -- ================================================================================================
 
 return {
-    { "nvim-mini/mini.ai", version = "*", opts = {} },
+    { "nvim-mini/mini.ai", version = "*", event = "VeryLazy", opts = {} },
     -- { "nvim-mini/mini.comment", version = "*", opts = {} },
 {
         "nvim-mini/mini.pairs",
         version = "*",
+        event = "InsertEnter",
         opts = {
             modes = { insert = true, command = false, terminal = false },
         },
@@ -65,6 +66,7 @@ return {
     {
         "nvim-mini/mini.surround",
         version = "*",
+        event = "VeryLazy",
         opts = {
             mappings = {
                 add = "gsa", -- Add surrounding in Normal and Visual modes
@@ -80,15 +82,15 @@ return {
             },
         },
     },
-    { "nvim-mini/mini.cursorword", version = "*", opts = {} },
-    { "nvim-mini/mini.indentscope", version = "*", opts = {} },
+    { "nvim-mini/mini.cursorword", version = "*", event = "VeryLazy", opts = {} },
+    { "nvim-mini/mini.indentscope", version = "*", event = "VeryLazy", opts = {} },
     {
         "nvim-mini/mini.trailspace",
         event = "VeryLazy",
         version = "*",
         opts = {},
     },
-    { "nvim-mini/mini.bufremove", version = "*", opts = {} },
+    { "nvim-mini/mini.bufremove", version = "*", event = "VeryLazy", opts = {} },
     -- { "nvim-mini/mini.notify", version = "*", opts = {} },
     -- { "nvim-mini/mini.pick", version = "*", opts = {} },
 }

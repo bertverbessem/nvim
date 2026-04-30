@@ -8,7 +8,7 @@
 -- ================================================================================================
 
 vim.lsp.config("intelephense", {
-    capabilities = require("blink.cmp").get_lsp_capabilities(),
+    capabilities = require("config.capabilities").get(),
     filetypes = { "php" },
     root_markers = { "composer.json", ".git" },
     settings = {

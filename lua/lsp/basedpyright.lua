@@ -5,7 +5,7 @@
 -- ================================================================================================
 
 vim.lsp.config("basedpyright", {
-    capabilities = require("blink.cmp").get_lsp_capabilities(),
+    capabilities = require("config.capabilities").get(),
     settings = {
         basedpyright = {
             disableOrganizeImports = false,

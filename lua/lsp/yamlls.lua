@@ -1,5 +1,5 @@
 vim.lsp.config("yamlls", {
-    capabilities = require("blink.cmp").get_lsp_capabilities(),
+    capabilities = require("config.capabilities").get(),
     filetypes = {
         "yaml",
         -- Exclude ansible filetypes to prevent conflicts with ansiblels
