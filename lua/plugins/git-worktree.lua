@@ -44,6 +44,48 @@ local function get_worktrees()
     return worktrees
 end
 
+local function get_all_remote_branches()
+    local output = vim.fn.systemlist("git branch -r")
+    if vim.v.shell_error ~= 0 then
+        return {}
+    end
+    local branches = {}
+    for _, line in ipairs(output) do
+        local branch = vim.trim(line)
+        if not branch:match("^origin/HEAD") then
+            table.insert(branches, branch:gsub("^origin/", ""))
+        end
+    end
+    return branches
+end
+
+local function get_remote_branches()
+    local output = vim.fn.systemlist("git branch -r")
+    if vim.v.shell_error ~= 0 then
+        return {}
+    end
+
+    local worktrees = get_worktrees()
+    local wt_branches = {}
+    for _, wt in ipairs(worktrees) do
+        if wt.branch then
+            wt_branches[wt.branch] = true
+        end
+    end
+
+    local branches = {}
+    for _, line in ipairs(output) do
+        local branch = vim.trim(line)
+        if not branch:match("^origin/HEAD") then
+            local name = branch:gsub("^origin/", "")
+            if not wt_branches[name] then
+                table.insert(branches, name)
+            end
+        end
+    end
+    return branches
+end
+
 local function switch_to_worktree(path)
     local old_cwd = vim.fn.getcwd()
     for _, buf in ipairs(vim.api.nvim_list_bufs()) do
@@ -74,7 +116,6 @@ local function list_worktrees()
     local cwd = vim.fn.getcwd()
 
     Snacks.picker({
-        source = "worktrees",
         title = "Git Worktrees",
         finder = function()
             local items = {}
@@ -168,26 +209,100 @@ local function create_worktree()
         return
     end
 
-    vim.ui.input({ prompt = "Branch name for new worktree: " }, function(branch)
-        if not branch or branch == "" then
-            return
-        end
+    local branches = get_remote_branches()
 
-        local worktree_path = bare_root .. "/" .. branch
+    local picker = Snacks.picker({
+        title = "Create Worktree (remote branch or new)",
+        finder = function()
+            local items = {}
+            for _, branch in ipairs(branches) do
+                table.insert(items, {
+                    text = branch,
+                    branch = branch,
+                })
+            end
+            return items
+        end,
+        format = function(item)
+            return { { item.branch, "SnacksPickerFile" } }
+        end,
+        layout = "vertical",
+        confirm = function(picker, item)
+            picker:close()
+            local branch, cmd, worktree_path
+            if item then
+                branch = item.branch
+                worktree_path = bare_root .. "/" .. branch
+                cmd = "git worktree add " .. vim.fn.shellescape(worktree_path) .. " " .. vim.fn.shellescape(branch)
+            else
+                branch = vim.trim(picker.input.filter.pattern)
+                if branch == "" then
+                    return
+                end
+                worktree_path = bare_root .. "/" .. branch
+                local start_branches = get_all_remote_branches()
 
-        local branch_exists = vim.fn.system("git rev-parse --verify " .. vim.fn.shellescape(branch) .. " 2>/dev/null")
-        local cmd
-        if vim.v.shell_error == 0 and branch_exists ~= "" then
-            cmd = "git worktree add " .. vim.fn.shellescape(worktree_path) .. " " .. vim.fn.shellescape(branch)
-        else
-            cmd = "git worktree add -b " .. vim.fn.shellescape(branch) .. " " .. vim.fn.shellescape(worktree_path)
-        end
+                local start_picker = Snacks.picker({
+                    title = "Start from branch",
+                    finder = function()
+                        local items = {}
+                        for _, b in ipairs(start_branches) do
+                            table.insert(items, { text = b, branch = b })
+                        end
+                        return items
+                    end,
+                    format = function(start_item)
+                        return { { start_item.branch, "SnacksPickerFile" } }
+                    end,
+                    layout = "vertical",
+                    confirm = function(start_picker_ref, start_item)
+                        start_picker_ref:close()
+                        local start_point = start_item and start_item.branch
+                            or vim.trim(start_picker_ref.input.filter.pattern)
+                        if start_point == "" then
+                            return
+                        end
+                        local new_cmd = "git worktree add -b "
+                            .. vim.fn.shellescape(branch)
+                            .. " "
+                            .. vim.fn.shellescape(worktree_path)
+                            .. " "
+                            .. vim.fn.shellescape(start_point)
+                        local new_result = vim.fn.system(new_cmd)
+                        if vim.v.shell_error == 0 then
+                            switch_to_worktree(worktree_path)
+                        else
+                            Snacks.notify.error("Failed to create worktree:\n" .. new_result)
+                        end
+                    end,
+                })
 
-        local result = vim.fn.system(cmd)
-        if vim.v.shell_error == 0 then
-            switch_to_worktree(worktree_path)
-        else
-            Snacks.notify.error("Failed to create worktree:\n" .. result)
+                vim.system({ "git", "fetch", "--prune" }, {}, function(result)
+                    if result.code == 0 then
+                        vim.schedule(function()
+                            start_branches = get_all_remote_branches()
+                            start_picker:find()
+                        end)
+                    end
+                end)
+                return
+            end
+
+            local result = vim.fn.system(cmd)
+            if vim.v.shell_error == 0 then
+                switch_to_worktree(worktree_path)
+            else
+                Snacks.notify.error("Failed to create worktree:\n" .. result)
+            end
+        end,
+    })
+
+    vim.system({ "git", "fetch", "--prune" }, {}, function(result)
+        if result.code == 0 then
+            vim.schedule(function()
+                branches = get_remote_branches()
+                picker:find()
+            end)
         end
     end)
 end

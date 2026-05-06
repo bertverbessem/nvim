@@ -63,14 +63,25 @@ map(
     "<cmd>silent !ansible-vault encrypt --encrypt-vault-id default --vault-pass-file ~/.vault_pass.txt % <CR>",
     { desc = "[V]ault [E]ncrypt" }
 )
---Save the current file with sudo privileges
-map("n", "<leader>w!", "<cmd>w !sudo tee % >/dev/null<CR>", { desc = "[W]rite [S]udo" })
-
 --Use leader q to quit
 map("n", "<leader>q", "<cmd>q!<CR>", { desc = "Quit" })
 
---Use leader w to save
-map("n", "<leader>w", "<cmd>w<CR>", { desc = "Save" })
+map("n", "<leader>w", function()
+  local filepath = vim.fn.expand("%:p")
+  if filepath == "" or vim.fn.filewritable(filepath) == 1 then
+    vim.cmd.write()
+  else
+    local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+    local content = table.concat(lines, "\n") .. "\n"
+    vim.fn.system({ "sudo", "tee", filepath }, content)
+    if vim.v.shell_error == 0 then
+      vim.cmd.edit({ bang = true })
+      vim.notify("Sudo write: " .. filepath, vim.log.levels.INFO)
+    else
+      vim.notify("Sudo write failed!", vim.log.levels.ERROR)
+    end
+  end
+end, { desc = "Save (auto-sudo)" })
 
 --Use leader W to save and quit
 map("n", "<leader>W", "<cmd>wq<CR>", { desc = "Save and [Q]uit" })
