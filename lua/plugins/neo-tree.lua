@@ -34,6 +34,7 @@ return {
             -- use_popups_for_input = false,
             window = {
                 mappings = {
+                    ["/"] = "noop",
                     ["s"] = "noop",
                     ["S"] = "noop",
                     ["t"] = "noop",
