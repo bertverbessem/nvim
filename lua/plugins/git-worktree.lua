@@ -53,7 +53,7 @@ local function get_all_remote_branches()
     for _, line in ipairs(output) do
         local branch = vim.trim(line)
         if not branch:match("^origin/HEAD") then
-            table.insert(branches, branch:gsub("^origin/", ""))
+            table.insert(branches, (branch:gsub("^origin/", "")))
         end
     end
     return branches
@@ -106,9 +106,9 @@ local function switch_to_worktree(path)
     end
 
     Snacks.notify.info("Switched to worktree: " .. path)
-    -- vim.schedule(function()
-    --     Snacks.picker.files()
-    -- end)
+    vim.schedule(function()
+        Snacks.picker.files()
+    end)
 end
 
 local function list_worktrees()
@@ -209,7 +209,7 @@ local function create_worktree()
         return
     end
 
-    local branches = get_remote_branches()
+    local branches = get_all_remote_branches()
 
     local picker = Snacks.picker({
         title = "Create Worktree (remote branch or new)",
@@ -257,12 +257,12 @@ local function create_worktree()
                     layout = "vertical",
                     confirm = function(start_picker_ref, start_item)
                         start_picker_ref:close()
-                        local start_point = start_item and start_item.branch
+                        local start_point = start_item and ("origin/" .. start_item.branch)
                             or vim.trim(start_picker_ref.input.filter.pattern)
                         if start_point == "" then
                             return
                         end
-                        local new_cmd = "git worktree add -b "
+                        local new_cmd = "git worktree add --no-track -b "
                             .. vim.fn.shellescape(branch)
                             .. " "
                             .. vim.fn.shellescape(worktree_path)
@@ -300,7 +300,7 @@ local function create_worktree()
     vim.system({ "git", "fetch", "--prune" }, {}, function(result)
         if result.code == 0 then
             vim.schedule(function()
-                branches = get_remote_branches()
+                branches = get_all_remote_branches()
                 picker:find()
             end)
         end
