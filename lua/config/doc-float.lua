@@ -40,8 +40,8 @@ function M.show(lines, title, ft, opts)
     vim.bo[buf].swapfile = false
     vim.bo[buf].modifiable = false
     vim.bo[buf].modified = false
-    vim.api.nvim_buf_set_keymap(buf, "n", "q", "<cmd>close<cr>", { noremap = true, silent = true })
-    vim.api.nvim_buf_set_keymap(buf, "n", "<Esc>", "<cmd>close<cr>", { noremap = true, silent = true })
+    vim.keymap.set("n", "q", "<cmd>close<cr>", { buffer = buf, silent = true })
+    vim.keymap.set("n", "<Esc>", "<cmd>close<cr>", { buffer = buf, silent = true })
 end
 
 function M.run_cmd(cmd, title, ft, opts)
