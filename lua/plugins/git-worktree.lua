@@ -97,6 +97,11 @@ local function switch_to_worktree(path)
         end
     end
 
+    -- Stop LSP clients so they re-root against the new worktree
+    for _, c in ipairs(vim.lsp.get_clients()) do
+        vim.lsp.stop_client(c.id, true)
+    end
+
     vim.cmd.cd(path)
 
     -- Set ANSIBLE_ROLES_PATH for the new worktree
@@ -107,7 +112,7 @@ local function switch_to_worktree(path)
 
     Snacks.notify.info("Switched to worktree: " .. path)
     vim.schedule(function()
-        Snacks.picker.files()
+        vim.cmd("Neotree dir=" .. vim.fn.fnameescape(path))
     end)
 end
 
