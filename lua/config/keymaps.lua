@@ -39,6 +39,27 @@ map("n", "J", "mzJ`z", { desc = "Join lines and keep cursor position" })
 -- Quick config editing
 map("n", "<leader>rc", "<Cmd>e ~/.config/nvim/init.lua<CR>", { desc = "Edit config" })
 
+-- Restart Neovim and restore the current session (layout, buffers, cursor)
+map("n", "<leader>R", function()
+    local session = vim.fn.stdpath("state") .. "/restart-session.vim"
+    -- Neo-tree's window can't be serialized by :mksession and restores empty,
+    -- so close it first and reopen after the restart if it was open.
+    local had_tree = false
+    for _, win in ipairs(vim.api.nvim_list_wins()) do
+        if vim.bo[vim.api.nvim_win_get_buf(win)].filetype == "neo-tree" then
+            had_tree = true
+            break
+        end
+    end
+    pcall(vim.cmd, "Neotree close")
+    vim.cmd("mksession! " .. vim.fn.fnameescape(session))
+    local post = "source " .. vim.fn.fnameescape(session)
+    if had_tree then
+        post = post .. " | Neotree show"
+    end
+    vim.cmd("restart " .. post)
+end, { desc = "Restart Neovim (restore session)" })
+
 -- File Explorer
 map("n", "<leader>F", "<Cmd>Neotree focus<CR>", { desc = "Focus on File Explorer" })
 map("n", "<leader>e", "<Cmd>Neotree toggle<CR>", { desc = "Toggle File Explorer" })
