@@ -5,6 +5,13 @@ return {
         opts = {},
     },
     {
+        "WhoIsSethDaniel/mason-tool-installer.nvim",
+        event = "VeryLazy",
+        opts = {
+            ensure_installed = { "revive", "gofumpt" },
+        },
+    },
+    {
         "williamboman/mason-lspconfig.nvim",
         event = "VeryLazy",
         opts = {

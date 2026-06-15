@@ -17,7 +17,7 @@ return {
             formatters_by_ft = {
                 lua = { "stylua" },
                 python = { "ruff_format" },
-                go = { "gofumpt" },
+                go = { "goimports", "gofumpt" },
                 json = { "fixjson" },
                 jsonc = { "fixjson" },
                 sh = { "shfmt" },
