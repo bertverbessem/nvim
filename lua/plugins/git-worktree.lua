@@ -117,7 +117,9 @@ local function switch_to_worktree(path)
 end
 
 local function list_worktrees()
-    local worktrees = get_worktrees()
+    local worktrees = vim.tbl_filter(function(wt)
+        return not wt.bare
+    end, get_worktrees())
     local cwd = vim.fn.getcwd()
 
     Snacks.picker({
