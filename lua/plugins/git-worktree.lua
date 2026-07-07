@@ -179,6 +179,8 @@ local function list_worktrees()
                     if input and input:lower() == "y" then
                         local result = vim.fn.system("git worktree remove " .. vim.fn.shellescape(item.path))
                         if vim.v.shell_error == 0 then
+                            -- Prune now-empty parent dirs left by slash-namespaced branches (feat/, fix/, ...)
+                            vim.fn.system("rmdir -p " .. vim.fn.shellescape(vim.fn.fnamemodify(item.path, ":h")) .. " 2>/dev/null")
                             -- Also delete the local and remote branch
                             if item.item.branch then
                                 vim.fn.system("git branch -d " .. vim.fn.shellescape(item.item.branch))
