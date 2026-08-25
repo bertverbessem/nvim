@@ -318,6 +318,25 @@ end
 
 return {
     dir = ".",
+    init = function()
+        vim.api.nvim_create_autocmd("VimEnter", {
+            callback = function()
+                local worktrees = get_worktrees()
+                local has_bare = vim.iter(worktrees):any(function(wt)
+                    return wt.bare
+                end)
+                if not has_bare then
+                    return
+                end
+                local non_bare = vim.iter(worktrees):filter(function(wt)
+                    return not wt.bare
+                end):totable()
+                if #non_bare == 1 then
+                    switch_to_worktree(non_bare[1].path)
+                end
+            end,
+        })
+    end,
     keys = {
         {
             "<leader>gw",
