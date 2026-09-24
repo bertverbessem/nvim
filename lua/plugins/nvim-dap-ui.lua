@@ -7,7 +7,7 @@ return {
 			"jay-babu/mason-nvim-dap.nvim",
 			dependencies = { "williamboman/mason.nvim" },
 			opts = {
-				ensure_installed = { "php", "python", "delve" },
+				ensure_installed = { "php", "python", "delve", "bash" },
 				handlers = {},
 			},
 		},
@@ -106,6 +106,54 @@ return {
 					["/var/www/html"] = "${workspaceFolder}",
 				},
 			},
+		}
+
+		-- Bash adapter (bashdb, bundled with mason's bash-debug-adapter)
+		local bash_dap = vim.fn.stdpath("data") .. "/mason/packages/bash-debug-adapter"
+		dap.adapters.bashdb = {
+			type = "executable",
+			command = bash_dap .. "/bash-debug-adapter",
+			name = "bashdb",
+		}
+
+		local function bash_config(name, program, args, cwd)
+			return {
+				type = "bashdb",
+				request = "launch",
+				name = name,
+				program = program,
+				args = args,
+				cwd = cwd,
+				pathBashdb = bash_dap .. "/extension/bashdb_dir/bashdb",
+				pathBashdbLib = bash_dap .. "/extension/bashdb_dir",
+				pathBash = "/opt/homebrew/bin/bash", -- /bin/bash is 3.2, bashdb needs 4+
+				pathCat = "cat",
+				pathMkfifo = "mkfifo",
+				pathPkill = "pkill",
+				env = {},
+				-- Program output goes to the dap-ui console; "integrated" would open a second
+				-- terminal split showing the same thing.
+				terminalKind = "debugConsole",
+				-- bashdb's own protocol chatter (examine/print, "Program stopped") is noise.
+				showDebugOutput = false,
+			}
+		end
+
+		local function prompt_args()
+			return vim.split(vim.fn.input("Arguments: "), " ", { trimempty = true })
+		end
+
+		dap.configurations.sh = {
+			bash_config("Debug this file", "${file}", {}, "${workspaceFolder}"),
+			bash_config("Debug this file with args", "${file}", prompt_args, "${workspaceFolder}"),
+			-- For a CLI that reads its config from the directory it runs in: pick the script,
+			-- its args and the working directory at launch time, so nothing is project-specific.
+			bash_config(
+				"Debug a script from a chosen directory",
+				function() return vim.fn.input("Script: ", vim.fn.expand("%:p"), "file") end,
+				prompt_args,
+				function() return vim.fn.input("Working directory: ", vim.fn.getcwd(), "dir") end
+			),
 		}
 
 		-- Python adapter (debugpy)
