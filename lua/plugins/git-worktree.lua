@@ -112,7 +112,18 @@ local function switch_to_worktree(path)
 
     Snacks.notify.info("Switched to worktree: " .. path)
     vim.schedule(function()
-        vim.cmd("Neotree dir=" .. vim.fn.fnameescape(path))
+        vim.cmd("Neotree show dir=" .. vim.fn.fnameescape(path))
+        for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+            if
+                vim.api.nvim_win_get_config(win).relative == ""
+                and vim.bo[vim.api.nvim_win_get_buf(win)].filetype ~= "neo-tree"
+            then
+                vim.api.nvim_set_current_win(win)
+                return
+            end
+        end
+        -- Only neo-tree left after the buffer cleanup: open a code pane next to it
+        vim.cmd("botright vnew")
     end)
 end
 
