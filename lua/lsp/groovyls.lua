@@ -7,7 +7,6 @@
 -- ================================================================================================
 
 vim.lsp.config("groovyls", {
-    capabilities = require("config.capabilities").get(),
     filetypes = { "groovy" },
     root_markers = { "Jenkinsfile", ".git", "build.gradle", "pom.xml", "settings.gradle" },
 })

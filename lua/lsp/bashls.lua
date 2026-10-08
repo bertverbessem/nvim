@@ -5,7 +5,6 @@
 -- ================================================================================================
 
 vim.lsp.config("bashls", {
-    capabilities = require("config.capabilities").get(),
     filetypes = { "sh", "bash", "zsh" },
     settings = {
         bashIde = {

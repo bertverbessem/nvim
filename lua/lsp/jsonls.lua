@@ -5,7 +5,6 @@
 -- ================================================================================================
 
 vim.lsp.config("jsonls", {
-    capabilities = require("config.capabilities").get(),
     filetypes = { "json", "jsonc" },
 })
 vim.lsp.enable("jsonls")

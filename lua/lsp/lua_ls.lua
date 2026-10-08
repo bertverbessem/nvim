@@ -8,7 +8,6 @@ vim.lsp.config("lua_ls", {
     cmd = { "lua-language-server" },
     filetypes = { "lua" },
     root_markers = { ".luarc.json", ".luarc.jsonc", ".git" },
-    capabilities = require("config.capabilities").get(),
     settings = {
         Lua = {
             runtime = { version = "LuaJIT" },

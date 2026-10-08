@@ -8,7 +8,6 @@
 -- ================================================================================================
 
 vim.lsp.config("intelephense", {
-    capabilities = require("config.capabilities").get(),
     filetypes = { "php" },
     root_markers = { "composer.json", ".git" },
     settings = {

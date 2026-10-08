@@ -5,7 +5,6 @@
 -- ================================================================================================
 
 vim.lsp.config("basedpyright", {
-    capabilities = require("config.capabilities").get(),
     settings = {
         basedpyright = {
             disableOrganizeImports = false,

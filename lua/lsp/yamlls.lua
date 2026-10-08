@@ -1,5 +1,4 @@
 vim.lsp.config("yamlls", {
-    capabilities = require("config.capabilities").get(),
     filetypes = {
         "yaml",
         -- Exclude ansible filetypes to prevent conflicts with ansiblels

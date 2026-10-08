@@ -1,3 +1,6 @@
+-- require blink here (loads it on first BufReadPost) so every server starts with its completion capabilities
+vim.lsp.config("*", { capabilities = require("blink.cmp").get_lsp_capabilities() })
+
 -- Load all LSP configurations
 local lsp_servers = {
     "lua_ls",

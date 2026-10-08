@@ -7,7 +7,6 @@
 -- ================================================================================================
 
 vim.lsp.config("ruff", {
-    capabilities = require("config.capabilities").get(),
     filetypes = { "python" },
     init_options = {
         settings = {

@@ -5,7 +5,6 @@
 -- ================================================================================================
 
 vim.lsp.config("gopls", {
-    capabilities = require("config.capabilities").get(),
     filetypes = { "go" },
     settings = {
         gopls = {
