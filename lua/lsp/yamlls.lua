@@ -9,7 +9,7 @@ vim.lsp.config("yamlls", {
         yaml = {
             schemas = {
                 -- Bitbucket Pipelines
-                ["https://bitbucket.org/atlassian/bitbucket-pipelines-schema/raw/master/bitbucket-pipelines-schema.json"] = "bitbucket-pipelines.yml",
+                ["https://ssh.bitbucket.org/atlassian/bitbucket-pipelines-schema/raw/master/bitbucket-pipelines-schema.json"] = "bitbucket-pipelines.yml",
                 -- Docker Compose
                 ["https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json"] = {
                     "docker-compose*.yml",
