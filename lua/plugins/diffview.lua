@@ -1,6 +1,6 @@
 return {
     "dlyongemallo/diffview.nvim",
-    cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewFileHistory", "DiffviewToggleFiles", "DiffviewFocusFiles" },
+    cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewFileHistory", "DiffviewToggleFiles", "DiffviewFocusFiles", "DiffviewWorktreeOverview" },
     keys = {
         { "<leader>gv", "<cmd>DiffviewOpen<cr>", desc = "Open Diffview" },
         { "<leader>gV", "<cmd>DiffviewClose<cr>", desc = "Close Diffview" },

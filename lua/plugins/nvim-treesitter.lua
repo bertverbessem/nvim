@@ -47,6 +47,8 @@ return {
             "nginx",
             "php",
             "twig",
+            "jinja",
+            "jinja_inline",
         })
     end,
 }
